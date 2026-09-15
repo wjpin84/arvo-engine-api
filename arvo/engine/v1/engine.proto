@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+// The Arvo engine's local API (ADR-0018).
+//
+// This file is the research tier: reading research memory and running
+// research. Nothing here names a source, a credential, an executor or an
+// order, so a caller holding this tier cannot reach one — the same boundary
+// ADR-0016 draws for agents, for every front end that is not the window.
+// Control calls (sessions, halts) are a separate service, added with them.
+//
+// Every call carries `authorization: Bearer <token>`, the token the engine
+// wrote to `engine.json` in the user's app data directory.
+package arvo.engine.v1;
+
+message Empty {}
+
+message Strategy {
+  string name = 1;
+  string label = 2;
+  // The resolution it runs at, e.g. "1d" or "5m".
+  string interval = 3;
+  // What the rule claims about how prices behave.
+  string premise = 4;
+  // True when the rule ranks instruments against each other and needs a set.
+  bool ranks_a_set = 5;
+}
+
+message Strategies {
+  repeated Strategy strategies = 1;
+}
+
+message Instrument {
+  // e.g. "AAPL.RH"
+  string id = 1;
+  string interval = 2;
+  // ISO dates, inclusive.
+  string from = 3;
+  string to = 4;
+}
+
+message Instruments {
+  repeated Instrument instruments = 1;
+}
+
+message FindingSummary {
+  string id = 1;
+  // What was run, e.g. "study", "walk-forward" or "panel".
+  string kind = 2;
+  string subject = 3;
+  // "Supported", "NotSupported" or "Inconclusive".
+  string verdict = 4;
+  // RFC 3339.
+  string recorded_at = 5;
+  // The agent or script that ran it; empty for a person.
+  string author = 6;
+}
+
+message Findings {
+  repeated FindingSummary findings = 1;
+  // Records in the evidence store that could not be read.
+  uint32 unreadable = 2;
+}
+
+message FindingId {
+  string id = 1;
+}
+
+message Advice {
+  // "blocking", "warning" or "note".
+  string severity = 1;
+  string finding = 2;
+  string action = 3;
+  string evidence = 4;
+}
+
+// One finding: the verdict and how far it may be read, before any number.
+message Finding {
+  FindingSummary summary = 1;
+  // A plain instruction on how far the verdict may be read. Read first.
+  string read_this_first = 2;
+  repeated string reasons = 3;
+  repeated Advice advice = 4;
+  // The numbers, which differ by kind: the search and the out-of-sample
+  // metrics for a study, the stitched record for a walk-forward, the pooled
+  // outcome for a panel. JSON, so a new number is not a new message.
+  string detail_json = 5;
+}
+
+message RunRequest {
+  string instrument = 1;
+  string strategy = 2;
+  // Who is running this, e.g. "script:momentum-scan". Required: a run is
+  // saved as this author's and deflated against everything the author has
+  // run, so a script iterating until something passes does not make it pass.
+  string author = 3;
+}
+
+service Research {
+  rpc ListStrategies(Empty) returns (Strategies);
+  rpc ListInstruments(Empty) returns (Instruments);
+  rpc ListFindings(Empty) returns (Findings);
+  rpc OpenFinding(FindingId) returns (Finding);
+  // Search a strategy's grid on one instrument, choose in-sample, judge
+  // out-of-sample. Seconds to a minute.
+  rpc RunStudy(RunRequest) returns (Finding);
+  // Re-select on a rolling schedule across the whole history. Slower by
+  // roughly the number of folds.
+  rpc RunWalkForward(RunRequest) returns (Finding);
+}
