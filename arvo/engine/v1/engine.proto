@@ -93,6 +93,9 @@ message RunRequest {
   // saved as this author's and deflated against everything the author has
   // run, so a script iterating until something passes does not make it pass.
   string author = 3;
+  // Where in the author's code the call was made, as "path:line", so the
+  // workbench can put the finding's caveats against that line. Optional.
+  string origin = 4;
 }
 
 service Research {
