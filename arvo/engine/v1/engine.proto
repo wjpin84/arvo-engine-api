@@ -84,6 +84,34 @@ message Finding {
   // metrics for a study, the stitched record for a walk-forward, the pooled
   // outcome for a panel. JSON, so a new number is not a new message.
   string detail_json = 5;
+  // Files kept with the finding (#157).
+  repeated Attachment attachments = 6;
+}
+
+// One file kept with a finding: bytes stored once by content hash, listed
+// on the record.
+message Attachment {
+  string name = 1;
+  string media_type = 2;
+  // blake3 of the bytes, hex.
+  string hash = 3;
+  uint64 bytes = 4;
+  // RFC 3339.
+  string added_at = 5;
+}
+
+// A file to keep with a finding the caller already recorded or ran.
+message AttachRequest {
+  string finding_id = 1;
+  // As the author names it: `report.md`, `equity.png`.
+  string name = 2;
+  // `text/markdown`, `image/png`; empty means application/octet-stream.
+  string media_type = 3;
+  bytes data = 4;
+}
+
+message Attachments {
+  repeated Attachment attachments = 1;
 }
 
 message RunRequest {
@@ -182,4 +210,7 @@ service Research {
   // criteria, saves it as the author's finding held to the author's whole
   // search, and answers with the finding it made of it (ADR-0026).
   rpc RecordFinding(ReportRequest) returns (Finding);
+  // Keep a file with a finding: a report, a figure, the trades. Stored once
+  // by content hash; the finding lists it (#157).
+  rpc AttachFile(AttachRequest) returns (Attachments);
 }
