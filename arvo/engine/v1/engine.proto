@@ -98,6 +98,75 @@ message RunRequest {
   string origin = 4;
 }
 
+// One point of an equity curve. `at` is `YYYY-MM-DDTHH:MM:SS` or a date.
+message Point {
+  string at = 1;
+  double equity = 2;
+}
+
+// One trade in a ledger: a round trip, or a position still open at the end
+// (empty `closed`, no `exit`).
+message LedgerTrade {
+  // `SYMBOL.VENUE`; empty when it is the experiment's own instrument.
+  string instrument = 1;
+  string opened = 2;
+  string closed = 3;
+  // "long" or "short"; empty means long.
+  string direction = 4;
+  double quantity = 5;
+  double entry = 6;
+  optional double exit = 7;
+  double pnl = 8;
+  double commission = 9;
+  // "signal", "stop", "halted", "expired" or "still_open"; empty means signal.
+  string exit_reason = 10;
+}
+
+// Evidence an engine Arvo did not run computed (ADR-0026). What a run
+// produces, before anyone concludes anything from it; Arvo computes the
+// verdict. There is no field for a verdict, a metric or a p-value.
+message ReportRequest {
+  // As RunRequest: who is recording this, and where in their code.
+  string author = 1;
+  string origin = 2;
+  // The hypothesis: an id, and the claim in prose.
+  string hypothesis_id = 3;
+  string claim = 4;
+  // The experiment as data.
+  string instrument = 5;
+  // ISO dates, inclusive.
+  string from = 6;
+  string to = 7;
+  // As arvo_data spells it: "1day", "5minute".
+  string interval = 8;
+  // The engine's own dataset: an id, and a content hash of what it read.
+  string dataset_id = 9;
+  string dataset_version = 10;
+  // "split" (the default) or "total_return".
+  string adjustment = 11;
+  // The engine's own strategy name, and its parameters.
+  string strategy = 12;
+  map<string, double> params = 13;
+  // The cost model the run assumed.
+  double commission_bps = 14;
+  double slippage_bps = 15;
+  double per_fill = 16;
+  // The risk model, as far as the run assumed one.
+  optional double stop_atr_multiple = 17;
+  // Zero means the curve's first point.
+  double starting_cash = 18;
+  // What computed this, by name and version.
+  string engine = 19;
+  // The evidence.
+  repeated Point strategy_curve = 20;
+  repeated LedgerTrade ledger = 21;
+  // Buy-and-hold over the same window and capital. Without it the finding
+  // is Inconclusive: a return with nothing to beat is not a result.
+  repeated Point benchmark_curve = 22;
+  // How many trials the author's whole search has run (ADR-0014).
+  optional uint32 trials = 23;
+}
+
 service Research {
   rpc ListStrategies(Empty) returns (Strategies);
   rpc ListInstruments(Empty) returns (Instruments);
@@ -109,4 +178,8 @@ service Research {
   // Re-select on a rolling schedule across the whole history. Slower by
   // roughly the number of folds.
   rpc RunWalkForward(RunRequest) returns (Finding);
+  // Record evidence computed elsewhere. Arvo judges it with a study's
+  // criteria, saves it as the author's finding held to the author's whole
+  // search, and answers with the finding it made of it (ADR-0026).
+  rpc RecordFinding(ReportRequest) returns (Finding);
 }
