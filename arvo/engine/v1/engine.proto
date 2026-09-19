@@ -6,10 +6,12 @@ syntax = "proto3";
 // research. Nothing here names a source, a credential, an executor or an
 // order, so a caller holding this tier cannot reach one — the same boundary
 // ADR-0016 draws for agents, for every front end that is not the window.
-// Control calls (sessions, halts) are a separate service, added with them.
+// Control calls — `Sessions` below — reach an executor, and are behind a
+// second token the engine writes to `control.json` beside `engine.json`.
+// The Python client and the MCP server read only `engine.json`; the window
+// and a CLI read both.
 //
-// Every call carries `authorization: Bearer <token>`, the token the engine
-// wrote to `engine.json` in the user's app data directory.
+// Every call carries `authorization: Bearer <token>`.
 package arvo.engine.v1;
 
 message Empty {}
@@ -213,4 +215,52 @@ service Research {
   // Keep a file with a finding: a report, a figure, the trades. Stored once
   // by content hash; the finding lists it (#157).
   rpc AttachFile(AttachRequest) returns (Attachments);
+}
+
+// ---------------------------------------------------------------- control --
+
+message StartRequest {
+  // The finding whose rule runs: its selected experiment, warmed on the
+  // library from the finding's own start to today.
+  string finding = 1;
+  // `alpaca-paper`, `alpaca-live`, or `robinhood-<last four>`.
+  string executor = 2;
+}
+
+message SessionId {
+  string id = 1;
+}
+
+message SessionStatus {
+  string id = 1;
+  string finding = 2;
+  string executor = 3;
+  string instrument = 4;
+  string strategy = 5;
+  string started_at = 6;
+  // starting, running, halted, stopped or failed.
+  string state = 7;
+  uint32 signals = 8;
+  uint32 submitted = 9;
+  uint32 refused = 10;
+  uint32 fills = 11;
+  // Why the gate halted, when it did.
+  optional string halted = 12;
+  optional string last_error = 13;
+  optional string last_bar = 14;
+}
+
+message SessionList {
+  repeated SessionStatus sessions = 1;
+}
+
+// The control tier (ADR-0018 point 4). Behind the control token, never the
+// research one: a script or an agent holding `engine.json` cannot reach it.
+service Sessions {
+  // Starts a finding's rule against a venue. Answers as soon as the session
+  // thread is up; a finding that cannot run shows as `failed` in ListSessions.
+  rpc StartSession(StartRequest) returns (SessionStatus);
+  // Stops after the current poll. Positions are left as they are.
+  rpc StopSession(SessionId) returns (SessionStatus);
+  rpc ListSessions(Empty) returns (SessionList);
 }
