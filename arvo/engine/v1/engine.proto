@@ -516,6 +516,10 @@ service Data {
   rpc RefreshPlugins(Empty) returns (View);
   rpc ListSignals(Empty) returns (View);
   rpc ReconcileProviders(Empty) returns (Empty);
+  // What each installed extension contributes to the picker, and any reason
+  // this build cannot offer it. The front end renders the rows; whether one
+  // can be run is this side's answer.
+  rpc ExtensionStrategies(Empty) returns (View);
   // The watchlist, and the prices that move under it. `Watchlist` also tells
   // the engine which symbols to keep the socket subscribed to, so asking for
   // the rows is what starts the ticks.
