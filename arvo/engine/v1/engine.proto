@@ -393,6 +393,40 @@ message CompareRequest {
   optional uint32 days = 5;
 }
 
+// A file the engine wrote, for a front end to reveal or open. A path rather
+// than bytes: the engine is one process per user on this machine (ADR-0018),
+// so a path means the same thing on both sides, and an export exists on disk
+// precisely so a person can find it twice.
+message ExportedPath {
+  string path = 1;
+}
+
+message SharedExperiment {
+  // The file's text, as the person pasted or opened it.
+  string text = 1;
+  string instrument = 2;
+}
+
+message TradeExport {
+  string name = 1;
+  // The rows as the front end has them, in the order it is showing them:
+  // `Vec<TradeRowExport>` as JSON. The engine does not derive these from the
+  // finding, because the sort order is the view's.
+  string rows_json = 2;
+}
+
+message ReportFigure {
+  string finding_id = 1;
+  // The equity chart the front end captured, base64 PNG. Absent is a report
+  // with no figure, not an error: only a window can draw one.
+  optional string figure = 2;
+}
+
+message AttachmentRef {
+  string finding_id = 1;
+  string hash = 2;
+}
+
 message PortfolioName {
   string name = 1;
 }
@@ -444,6 +478,14 @@ service Data {
   rpc ListPortfolios(Empty) returns (View);
   rpc SyncAccounts(Empty) returns (View);
   rpc SyncPortfolio(PortfolioName) returns (View);
+  // Running an imported experiment, and the files a finding turns into. Each
+  // export answers with a path the caller reveals; the engine writes, the
+  // front end shows.
+  rpc RunSharedExperiment(SharedExperiment) returns (View);
+  rpc ExportTrades(TradeExport) returns (ExportedPath);
+  rpc ExportExperiment(FindingId) returns (ExportedPath);
+  rpc ComposeReport(ReportFigure) returns (ExportedPath);
+  rpc AttachmentPath(AttachmentRef) returns (ExportedPath);
 }
 
 service Sessions {
