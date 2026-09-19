@@ -393,6 +393,30 @@ message CompareRequest {
   optional uint32 days = 5;
 }
 
+message VendorId {
+  string vendor = 1;
+}
+
+message SignIn {
+  // Where to send the person. The caller opens it: the engine binds the
+  // loopback listener and exchanges the code, but opening a browser is the
+  // front end's job (ADR-0028).
+  string url = 1;
+}
+
+message VendorProfile {
+  string vendor = 1;
+  // Which sub-account, for a vendor that has them (Alpaca's paper and live).
+  optional string profile = 2;
+}
+
+message AccountKeys {
+  string vendor = 1;
+  optional string profile = 2;
+  string key_id = 3;
+  string secret = 4;
+}
+
 // The data library and the sources that fill it.
 //
 // Behind the control token, not the research one. Fetching changes the
@@ -404,6 +428,13 @@ service Data {
   rpc SearchInstruments(InstrumentSearch) returns (View);
   rpc FetchBars(FetchRequest) returns (View);
   rpc CompareSources(CompareRequest) returns (View);
+  // Accounts and their credentials (ADR-0028). The engine holds every
+  // credential; BeginSignIn answers with a URL and reports the outcome as an
+  // event rather than making the caller wait for a person.
+  rpc ListAccounts(Empty) returns (View);
+  rpc BeginSignIn(VendorId) returns (SignIn);
+  rpc DisconnectAccount(VendorProfile) returns (Empty);
+  rpc StoreAccountKeys(AccountKeys) returns (Empty);
 }
 
 service Sessions {
