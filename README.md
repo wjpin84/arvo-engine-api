@@ -1,7 +1,7 @@
 # The Arvo engine API
 
 The contract between Arvo's engine and whatever talks to it: the desktop
-window, the command line, a script, an agent. Two protobuf files and the notes
+window, the command line, a script, an agent. Protobuf files and the notes
 that go with them. There is no code here and no language — a front end in any
 language generates these and reads a finding natively.
 
