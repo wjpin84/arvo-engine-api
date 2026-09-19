@@ -328,6 +328,9 @@ service Research {
   rpc ViewComparison(FindingIds) returns (View);
   rpc ViewProblems(Empty) returns (View);
   rpc ListAttachments(FindingId) returns (Attachments);
+  // What happened, as it happens: every event the engine raises, as a View
+  // of kind EventView (#150). A session changing state is the first.
+  rpc Subscribe(Empty) returns (stream View);
 }
 
 // ---------------------------------------------------------------- control --
