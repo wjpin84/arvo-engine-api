@@ -372,6 +372,40 @@ message SessionList {
 
 // The control tier (ADR-0018 point 4). Behind the control token, never the
 // research one: a script or an agent holding `engine.json` cannot reach it.
+message InstrumentSearch {
+  string query = 1;
+  // The source to ask; the broker when absent.
+  optional string source = 2;
+}
+
+message FetchRequest {
+  string instrument = 1;
+  string interval = 2;
+  optional uint32 days = 3;
+  optional string source = 4;
+}
+
+message CompareRequest {
+  string instrument = 1;
+  string interval = 2;
+  optional string first = 3;
+  optional string second = 4;
+  optional uint32 days = 5;
+}
+
+// The data library and the sources that fill it.
+//
+// Behind the control token, not the research one. Fetching changes the
+// library and makes existing findings stale, which is a person's decision
+// (ADR-0016); an agent holding engine.json cannot reach any of this.
+service Data {
+  rpc ViewLibrary(Empty) returns (View);
+  rpc ListSources(Empty) returns (View);
+  rpc SearchInstruments(InstrumentSearch) returns (View);
+  rpc FetchBars(FetchRequest) returns (View);
+  rpc CompareSources(CompareRequest) returns (View);
+}
+
 service Sessions {
   // Starts a finding's rule against a venue. Answers as soon as the session
   // thread is up; a finding that cannot run shows as `failed` in ListSessions.
