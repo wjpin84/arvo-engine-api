@@ -494,6 +494,13 @@ service Data {
   // a job lives where its work does, and the list is a merge.
   rpc ListJobs(Empty) returns (View);
   rpc RunJob(JobId) returns (Empty);
+  // The plugins this engine hosts (ADR-0029). It probes them, supervises them,
+  // and holds the credential each call may use; a front end reads and asks for
+  // a reconcile after it has changed what is installed.
+  rpc ListPlugins(Empty) returns (View);
+  rpc RefreshPlugins(Empty) returns (View);
+  rpc ListSignals(Empty) returns (View);
+  rpc ReconcileProviders(Empty) returns (Empty);
 }
 
 service Sessions {
