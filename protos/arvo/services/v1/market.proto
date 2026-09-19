@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/market/v1/market.proto";
+
+// The data library, the sources that fill it, and prices.
+//
+// Behind the control token, not the research one. Fetching changes the
+// library and makes existing findings stale, which is a person's decision
+// (ADR-0016); an agent holding engine.json cannot reach any of this.
+service Market {
+  rpc ViewLibrary(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ListSources(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc SearchInstruments(arvo.market.v1.InstrumentSearch) returns (arvo.common.v1.View);
+  rpc FetchBars(arvo.market.v1.FetchRequest) returns (arvo.common.v1.View);
+  rpc CompareSources(arvo.market.v1.CompareRequest) returns (arvo.common.v1.View);
+  // The watchlist, and the prices that move under it. `Watchlist` also tells
+  // the engine which symbols to keep the socket subscribed to, so asking for
+  // the rows is what starts the ticks.
+  rpc Watchlist(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc StreamQuotes(arvo.common.v1.Empty) returns (stream arvo.market.v1.QuoteTick);
+}

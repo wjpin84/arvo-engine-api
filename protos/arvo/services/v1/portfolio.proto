@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/portfolio/v1/portfolio.proto";
+
+// What is held, valued.
+//
+// Behind the control token: syncing reads holdings from a venue, which
+// needs a credential. Read-only otherwise — nothing here places, cancels
+// or modifies an order.
+service Portfolio {
+  // Holdings: files the person exported, or ones a connected vendor wrote.
+  // Read-only; nothing here places, cancels or modifies an order.
+  rpc ListPortfolios(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc SyncAccounts(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc SyncPortfolio(arvo.portfolio.v1.PortfolioName) returns (arvo.common.v1.View);
+}

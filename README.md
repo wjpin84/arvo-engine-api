@@ -19,13 +19,33 @@ in their own package.
 | `arvo.session.v1` | a rule trading against a venue, live |
 | `arvo.platform.v1` | the engine's own jobs, plugins and accounts |
 | `arvo.views.v1` | what a front end renders, split by the same domains |
-| `arvo.services.v1` | the three services: `Research`, `Data`, `Sessions` |
+| `arvo.services.v1` | the services, one file per domain |
 
 `platform`, not `plugin`: `arvo.plugin.v1` is the provider contract in the
 other repository, and one name cannot mean two things.
 
 There is no error message anywhere here, on purpose. A refusal crosses as a
 gRPC status code, one per kind, which is the same rule a provider follows.
+
+## The services, and which token each is behind
+
+A service is named for its domain, not for who may call it. Which token it
+admits is a property of the service, applied by an interceptor, and it is
+stated at the top of each file.
+
+| Service | Token | What it is for |
+| --- | --- | --- |
+| `Research` | research | the agent surface: findings, studies, the shapes a workbench renders |
+| `ResearchFiles` | control | importing an experiment someone sent, and what a finding turns into on disk |
+| `Market` | control | the data library, the sources that fill it, and prices |
+| `Accounts` | control | a person's relationship with each vendor |
+| `Portfolio` | control | what is held, valued |
+| `Platform` | control | jobs and the plugins this engine hosts |
+| `Sessions` | control | a rule trading against a venue, live |
+
+`Research` is the one an agent reaches. Nothing on it fetches, trades, shares,
+imports, or names a credential, and a test in the engine reads this directory
+to keep that true.
 
 ## The other direction is a different repository
 

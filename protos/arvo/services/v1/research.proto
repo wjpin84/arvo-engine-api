@@ -46,3 +46,21 @@ service Research {
   // of kind EventView (#150). A session changing state is the first.
   rpc Subscribe(arvo.common.v1.Empty) returns (stream arvo.common.v1.View);
 }
+
+// The research files a person asks for: an experiment someone sent, and
+// what a finding turns into on disk.
+//
+// Behind the *control* token, not the research one. Import is on the
+// research boundary's forbidden list — an agent may run what this build
+// implements, not a file someone sent it — and an export writes to the
+// person's own folder.
+service ResearchFiles {
+  // Running an imported experiment, and the files a finding turns into. Each
+  // export answers with a path the caller reveals; the engine writes, the
+  // front end shows.
+  rpc RunSharedExperiment(arvo.research.v1.SharedExperiment) returns (arvo.common.v1.View);
+  rpc ExportTrades(arvo.research.v1.TradeExport) returns (arvo.common.v1.ExportedPath);
+  rpc ExportExperiment(arvo.research.v1.FindingId) returns (arvo.common.v1.ExportedPath);
+  rpc ComposeReport(arvo.research.v1.ReportFigure) returns (arvo.common.v1.ExportedPath);
+  rpc AttachmentPath(arvo.research.v1.AttachmentRef) returns (arvo.common.v1.ExportedPath);
+}

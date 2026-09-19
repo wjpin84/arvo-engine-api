@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/platform/v1/platform.proto";
+
+// A person's relationship with each vendor.
+//
+// Behind the control token. The engine owns a venue session end to end
+// (ADR-0028): it binds the loopback listener, exchanges the code and holds
+// the credential, and a front end's whole part is opening a URL.
+service Accounts {
+  // Accounts and their credentials (ADR-0028). The engine holds every
+  // credential; BeginSignIn answers with a URL and reports the outcome as an
+  // event rather than making the caller wait for a person.
+  rpc ListAccounts(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc BeginSignIn(arvo.platform.v1.VendorId) returns (arvo.platform.v1.SignIn);
+  rpc DisconnectAccount(arvo.platform.v1.VendorProfile) returns (arvo.common.v1.Empty);
+  rpc StoreAccountKeys(arvo.platform.v1.AccountKeys) returns (arvo.common.v1.Empty);
+}

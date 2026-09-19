@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/platform/v1/platform.proto";
+
+// The engine's own moving parts.
+//
+// Behind the control token: what runs on a timer, and the plugins this
+// engine hosts (ADR-0029). A front end shows these beside its own.
+service Platform {
+  // The engine's own background jobs. A front end shows these beside its own:
+  // a job lives where its work does, and the list is a merge.
+  rpc ListJobs(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc RunJob(arvo.platform.v1.JobId) returns (arvo.common.v1.Empty);
+  // The plugins this engine hosts (ADR-0029). It probes them, supervises them,
+  // and holds the credential each call may use; a front end reads and asks for
+  // a reconcile after it has changed what is installed.
+  rpc ListPlugins(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc RefreshPlugins(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ListSignals(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ReconcileProviders(arvo.common.v1.Empty) returns (arvo.common.v1.Empty);
+  // What each installed extension contributes to the picker, and any reason
+  // this build cannot offer it. The front end renders the rows; whether one
+  // can be run is this side's answer.
+  rpc ExtensionStrategies(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+}
