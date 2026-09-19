@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package arvo.views.v1;
+
+// Same package as the other view files: one namespace, split by domain so
+// a reader finds a shape where its subject lives.
+
+// What is held, valued, and what changed.
+
+// One vendor as the Accounts view shows it: what it needs from the
+// person, whether it has it, and what it gives back.
+message AccountView {
+  // The vendor's id: `robinhood`, `alpaca`, `yahoo`.
+  string id = 1;
+  string label = 2;
+  // `none`, `sign_in` or `keys`.
+  string credential = 3;
+  // Whether the credential is there and the vendor can be used. Always
+  // true for one needing nothing.
+  bool connected = 4;
+  // In words: `bars`, `quotes`, `holdings`, `option quotes`.
+  repeated string provides = 5;
+  // The sources under this vendor, by label.
+  repeated string sources = 6;
+  // When one vendor login holds several accounts that each need their own
+  // credential — Alpaca's paper and live, from one login but two key pairs
+  // — each is one of these. Empty for a vendor with a single credential.
+  repeated SubAccountView subaccounts = 7;
+}
+
+// The move between the two most recent valuations.
+message ChangeView {
+  string from = 1;
+  string to = 2;
+  double absolute = 3;
+  optional double percent = 4;
+}
+
+message HoldingView {
+  string instrument = 1;
+  // `None` when the source reported money without units — a collective
+  // trust in a 401(k) does exactly that.
+  optional double quantity = 2;
+  optional double price = 3;
+  double market_value = 4;
+  optional double cost_basis = 5;
+  optional double unrealized = 6;
+  optional double unrealized_pct = 7;
+  double weight = 8;
+  // "statement", "last_close" or "face" — so a price nobody verified is
+  // visibly different from one that came off a statement.
+  string priced_by = 9;
+}
+
+message ImportView {
+  // Role → the column heading used for it.
+  repeated NamedText columns = 1;
+  repeated string ignored = 2;
+  uint32 rows_imported = 3;
+  repeated string rows_skipped = 4;
+  // Cost basis came from a per-share column multiplied by quantity.
+  bool cost_basis_derived = 5;
+}
+
+// A column and what it was read as.
+message NamedText {
+  string name = 1;
+  string value = 2;
+}
+
+message PortfolioLibraryView {
+  // Shown so somebody with no holdings file knows where to put one.
+  string directory = 1;
+  repeated PortfolioView portfolios = 2;
+}
+
+message PortfolioView {
+  string name = 1;
+  string as_of = 2;
+  double total_value = 3;
+  optional double total_cost = 4;
+  optional double unrealized = 5;
+  optional double unrealized_pct = 6;
+  // How many holdings reported no cost basis. Normal for a 401(k).
+  uint32 without_cost_basis = 7;
+  double cash = 8;
+  repeated HoldingView holdings = 9;
+  repeated string unpriced = 10;
+  // Value on every day this portfolio has been looked at. A holdings file
+  // says what you hold now; almost everything interesting is a change, and
+  // a single export cannot express one.
+  repeated ValuePoint value_history = 11;
+  // `None` until a portfolio has been valued on two different days.
+  ChangeView change = 12;
+  // Holdings over their band or over the default ceiling, as sentences
+  // saying what to trim (#27). See `arvo_portfolio::bands`.
+  repeated string warnings = 13;
+  // How the file was read. Shown, not hidden: an importer that guessed a
+  // column wrong produces a portfolio that looks entirely plausible, and
+  // this is the only thing that would reveal it.
+  ImportView import = 14;
+  // The vendor whose sync wrote this file (`robinhood`), or `None` for a
+  // file the person exported themselves. Says whether a refresh is a
+  // button or a matter of replacing the file.
+  optional string source = 15;
+  // Simulated money — a broker's paper account. Never added to a real
+  // total: one blended number would report a paper gain as wealth.
+  bool paper = 16;
+  // When the file was last written, as the file system says: the last
+  // sync for a synced account, the last export for an exported one.
+  optional string refreshed_at = 17;
+}
+
+// One account under a vendor that has more than one: its own credential and
+// its own state, sharing the vendor's row.
+message SubAccountView {
+  // The vendor's spelling: `paper`, `live`.
+  string id = 1;
+  string label = 2;
+  bool connected = 3;
+  // Real money, so the window can mark it. Paper is not.
+  bool live = 4;
+}
+
+// One day on the value line.
+message ValuePoint {
+  // Seconds since the epoch, the same convention every other chart series
+  // uses. One convention rather than two: the portfolio chart reuses the
+  // research chart component, and a date string here against epoch seconds
+  // there is a mismatch the compiler cannot see and the reader meets as a
+  // deserialisation error at runtime.
+  int64 time = 1;
+  double value = 2;
+}

@@ -7,10 +7,25 @@ language generates these and reads a finding natively.
 
 ## What is here
 
-| Proto | What it carries |
+Models by domain, services apart from them, and the shapes a front end renders
+in their own package.
+
+| Package | What it holds |
 | --- | --- |
-| [`engine.proto`](protos/arvo/engine/v1/engine.proto) | the calls: research, the data library, sessions, accounts, plugins, jobs |
-| [`views.proto`](protos/arvo/views/v1/views.proto) | the shapes those calls answer with |
+| `arvo.common.v1` | shapes with no domain of their own |
+| `arvo.market.v1` | instruments, prices, and asking a vendor for either |
+| `arvo.research.v1` | findings, the rules that produce them, and what a run is held to |
+| `arvo.portfolio.v1` | what is held |
+| `arvo.session.v1` | a rule trading against a venue, live |
+| `arvo.platform.v1` | the engine's own jobs, plugins and accounts |
+| `arvo.views.v1` | what a front end renders, split by the same domains |
+| `arvo.services.v1` | the three services: `Research`, `Data`, `Sessions` |
+
+`platform`, not `plugin`: `arvo.plugin.v1` is the provider contract in the
+other repository, and one name cannot mean two things.
+
+There is no error message anywhere here, on purpose. A refusal crosses as a
+gRPC status code, one per kind, which is the same rule a provider follows.
 
 ## The other direction is a different repository
 

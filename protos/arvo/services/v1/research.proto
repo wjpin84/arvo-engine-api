@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/market/v1/market.proto";
+import "arvo/research/v1/research.proto";
+
+service Research {
+  rpc ListStrategies(arvo.common.v1.Empty) returns (arvo.research.v1.Strategies);
+  rpc ListInstruments(arvo.common.v1.Empty) returns (arvo.market.v1.Instruments);
+  rpc ListFindings(arvo.common.v1.Empty) returns (arvo.research.v1.Findings);
+  rpc OpenFinding(arvo.research.v1.FindingId) returns (arvo.research.v1.Finding);
+  // Search a strategy's grid on one instrument, choose in-sample, judge
+  // out-of-sample. Seconds to a minute.
+  rpc RunStudy(arvo.research.v1.RunRequest) returns (arvo.research.v1.Finding);
+  // Re-select on a rolling schedule across the whole history. Slower by
+  // roughly the number of folds.
+  rpc RunWalkForward(arvo.research.v1.RunRequest) returns (arvo.research.v1.Finding);
+  // Record evidence computed elsewhere. Arvo judges it with a study's
+  // criteria, saves it as the author's finding held to the author's whole
+  // search, and answers with the finding it made of it (ADR-0026).
+  rpc RecordFinding(arvo.research.v1.ReportRequest) returns (arvo.research.v1.Finding);
+  // Keep a file with a finding: a report, a figure, the trades. Stored once
+  // by content hash; the finding lists it (#157).
+  rpc AttachFile(arvo.research.v1.AttachRequest) returns (arvo.research.v1.Attachments);
+  // The project's rulesets and the rules they may search (#146, #127).
+  rpc ListRulesets(arvo.common.v1.Empty) returns (arvo.research.v1.Rulesets);
+  rpc ReadRuleset(arvo.research.v1.RulesetPath) returns (arvo.research.v1.RulesetForm);
+  rpc WriteRuleset(arvo.research.v1.RulesetForm) returns (arvo.research.v1.Ruleset);
+  rpc ListRules(arvo.common.v1.Empty) returns (arvo.research.v1.Rules);
+  rpc GetRiskModel(arvo.common.v1.Empty) returns (arvo.research.v1.RiskModel);
+  // The workbench's own views (#127 stage 2): what the window renders, from
+  // the same runs an agent's RunStudy performs.
+  rpc ViewStudy(arvo.research.v1.StudyRequest) returns (arvo.common.v1.View);
+  rpc ViewWalkForward(arvo.research.v1.StudyRequest) returns (arvo.common.v1.View);
+  rpc ViewPanel(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ViewBook(arvo.research.v1.BookRequest) returns (arvo.common.v1.View);
+  rpc ViewHistory(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ViewRecord(arvo.research.v1.FindingId) returns (arvo.common.v1.View);
+  rpc ViewReplay(arvo.research.v1.FindingId) returns (arvo.common.v1.View);
+  rpc ViewComparison(arvo.research.v1.FindingIds) returns (arvo.common.v1.View);
+  rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ListAttachments(arvo.research.v1.FindingId) returns (arvo.research.v1.Attachments);
+  // What happened, as it happens: every event the engine raises, as a View
+  // of kind EventView (#150). A session changing state is the first.
+  rpc Subscribe(arvo.common.v1.Empty) returns (stream arvo.common.v1.View);
+}

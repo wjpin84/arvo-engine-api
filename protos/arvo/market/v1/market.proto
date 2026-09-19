@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package arvo.market.v1;
+
+// Instruments, prices, and asking a vendor for either.
+
+message Instrument {
+  // e.g. "AAPL.RH"
+  string id = 1;
+  string interval = 2;
+  // ISO dates, inclusive.
+  string from = 3;
+  string to = 4;
+}
+
+message Instruments {
+  repeated Instrument instruments = 1;
+}
+
+// One trade off the live price stream.
+//
+// Typed rather than a View: there are hundreds a minute, and the four fields
+// are the whole of it. Display only — a tick never becomes a bar, because the
+// data library is fetched files with a content hash and that hash is what
+// makes a stored verdict checkable.
+message QuoteTick {
+  string symbol = 1;
+  double price = 2;
+  optional double change = 3;
+  // Whether it came from the regular session rather than a pre- or post-market
+  // print.
+  bool regular = 4;
+}
+
+// The control tier (ADR-0018 point 4). Behind the control token, never the
+// research one: a script or an agent holding `engine.json` cannot reach it.
+message InstrumentSearch {
+  string query = 1;
+  // The source to ask; the broker when absent.
+  optional string source = 2;
+}
+
+message FetchRequest {
+  string instrument = 1;
+  string interval = 2;
+  optional uint32 days = 3;
+  optional string source = 4;
+}
+
+message CompareRequest {
+  string instrument = 1;
+  string interval = 2;
+  optional string first = 3;
+  optional string second = 4;
+  optional uint32 days = 5;
+}

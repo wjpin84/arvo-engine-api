@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package arvo.views.v1;
+
+// Same package as the other view files: one namespace, split by domain so
+// a reader finds a shape where its subject lives.
+
+// The data library, the sources that fill it, and prices.
+
+// A stored finding, summarised for the history list.
+// Something wrong with the price series a result was produced from.
+//
+// Shown beside the verdict rather than in a data screen nobody opens. A
+// verdict is only as good as the bars under it, and a backtest cannot tell an
+// unadjusted split from a crash — it will trade both and report a number
+// either way.
+message DataFindingView {
+  // `fault` for something that cannot legitimately be true of a price
+  // series, `suspect` for something merely unusual.
+  string severity = 1;
+  string kind = 2;
+  optional string at = 3;
+  string detail = 4;
+}
+
+message DataLibraryView {
+  // Shown so a user with no data knows where to put some.
+  string directory = 1;
+  repeated InstrumentView instruments = 2;
+}
+
+// What a fetch pulled in.
+message FetchView {
+  string instrument = 1;
+  // Which source answered. Part of the result rather than assumed, now that
+  // it is a choice: two vendors' copies of one ticker are two datasets.
+  string source = 2;
+  string interval = 3;
+  uint32 bars = 4;
+  // Gap-fill bars the server synthesised, which were dropped. Surfaced
+  // rather than hidden: a series that is a quarter invented is one to know
+  // about before drawing a conclusion from it.
+  uint32 interpolated = 5;
+  optional string from = 6;
+  optional string to = 7;
+  repeated DataFindingView data_findings = 8;
+  // What changed against the copy already held, when there was one.
+  //
+  // A re-fetch that rewrites history stales every finding on the
+  // instrument, correctly, via the content hash. This says *why* it
+  // changed — a re-adjustment after a corporate action leaves the
+  // underlying facts intact, a revision does not, and the two want
+  // different responses.
+  optional string revision = 9;
+  // True only when the change was a genuine disagreement about prices,
+  // rather than a rescaling or extra coverage.
+  bool revised = 10;
+  // Cash distributions stored alongside the bars.
+  //
+  // `None` means the source does not serve dividends at all, which is a
+  // different fact from `Some(0)` — it looked, and the instrument paid none.
+  // Collapsing the two would report "no dividends" for an instrument that
+  // pays them, which is the direction the platform's excess-return bias
+  // already leans.
+  optional uint32 dividends = 11;
+}
+
+message InstrumentView {
+  string id = 1;
+  // `None` when the file exists but holds no usable bars.
+  optional string from = 2;
+  optional string to = 3;
+  uint32 bars = 4;
+  // Content hash of the data as it stands right now. The workbench compares
+  // this against the hash recorded in a held result to tell whether that
+  // result still describes the data on disk.
+  optional string fingerprint = 5;
+}
+
+// One instrument the broker knows about.
+message MatchView {
+  // The Arvo id it would be filed under, ready to fetch.
+  string instrument = 1;
+  string symbol = 2;
+  string name = 3;
+  optional double price = 4;
+  // Move since the previous close, as a fraction.
+  optional double change = 5;
+  // Whether the data library already holds this instrument.
+  bool held = 6;
+}
+
+// One row of the watchlist: an instrument, priced now.
+//
+// `held` is why this is not just a ticker — the same move means something
+// different depending on whether you own the thing.
+//
+// # What is deliberately not here
+//
+// The position's value. A holding is valued from the statement or the last
+// close on disk, never from the network (see `arvo_runtime::portfolio`), and
+// putting that figure beside a live price would show two numbers priced two
+// ways as though they agreed. The live price belongs to the watchlist; the
+// valuation belongs to the portfolio, and they stay apart.
+message QuoteView {
+  string instrument = 1;
+  string symbol = 2;
+  // `None` when the row exists but nothing has priced it yet — no broker
+  // session for the snapshot, and no tick arrived for it yet. Optional
+  // rather than zero because `$0.00` is a price, and a wrong one.
+  optional double price = 3;
+  // Move since the previous close, as a fraction. `None` when there is a
+  // price but no previous close to measure it against.
+  optional double change = 4;
+  bool held = 5;
+}
+
+// What two sources say about the same instrument over the same window.
+//
+// The verdict is [`Self::summary`] and the counts are beside it, deliberately:
+// two vendors disagreeing is the normal case and most of the ways they
+// disagree are not faults, so a bare count of differing bars is true, useless,
+// and the kind of thing that gets a check switched off.
+message SourceComparisonView {
+  string symbol = 1;
+  string interval = 2;
+  string first = 3;
+  string second = 4;
+  uint32 first_bars = 5;
+  uint32 second_bars = 6;
+  // Bar instants present in both.
+  uint32 shared = 7;
+  // Bars one has and the other does not. Independent of whether the shared
+  // ones agree: two sources can cover different sessions and match perfectly
+  // wherever they overlap.
+  uint32 only_first = 8;
+  uint32 only_second = 9;
+  string summary = 10;
+  // True only for a genuine price disagreement — not for a rescaling, which
+  // is an adjustment difference with neither side wrong, and not for a
+  // coverage difference.
+  bool diverged = 11;
+  // Why the two sources cannot be compared at face value, when they cannot.
+  //
+  // Neither axis it reports — how much of the tape a feed covers, and what
+  // the prices are adjusted for — is visible in the bars, so this comes from
+  // what each source declares rather than from any check. A thin feed and
+  // the consolidated tape report the same prices; only the volumes differ,
+  // and `agreement` deliberately does not compare volume.
+  optional string basis_mismatch = 12;
+}
+
+// One source the app can fetch from.
+message SourceView {
+  string id = 1;
+  string label = 2;
+  // The namespace instruments fetched here are filed under. Shown because
+  // it is half of the instrument id a person will see afterwards.
+  string venue = 3;
+  // Whether it can fetch right now. Always true for a source needing no
+  // credential, which is the honest answer rather than a claim about a
+  // session that does not exist.
+  bool connected = 4;
+  // Whether this source has a browser sign-in, so the window does not offer
+  // a button for something that cannot be done.
+  bool needs_sign_in = 5;
+  // Whether this source is authorised by a key pair typed in once.
+  //
+  // Two flags rather than one enum, because a view is a flattened thing and
+  // this one crosses to a wasm window that depends on `serde` and nothing
+  // else. The single source of truth is `arvo_data::source::Credential`,
+  // read once in `list_sources` through a match the compiler keeps
+  // exhaustive — so the pair cannot drift from it, even though the pair by
+  // itself could express nonsense.
+  bool needs_keys = 6;
+}

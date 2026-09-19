@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/common.proto";
+import "arvo/session/v1/session.proto";
+
+service Sessions {
+  // Starts a finding's rule against a venue. Answers as soon as the session
+  // thread is up; a finding that cannot run shows as `failed` in ListSessions.
+  rpc StartSession(arvo.session.v1.StartRequest) returns (arvo.session.v1.SessionStatus);
+  // Stops after the current poll. Positions are left as they are.
+  rpc StopSession(arvo.session.v1.SessionId) returns (arvo.session.v1.SessionStatus);
+  rpc ListSessions(arvo.common.v1.Empty) returns (arvo.session.v1.SessionList);
+  // Stop serving and exit. The front end that started this engine asks before
+  // it kills: a killed process runs no destructors, so the providers it
+  // supervises would be orphaned (ADR-0029, ADR-0023 point 5).
+  rpc Shutdown(arvo.common.v1.Empty) returns (arvo.common.v1.Empty);
+}

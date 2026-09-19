@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package arvo.session.v1;
+
+// A rule trading against a venue, live.
+
+message StartRequest {
+  // The finding whose rule runs: its selected experiment, warmed on the
+  // library from the finding's own start to today.
+  string finding = 1;
+  // `alpaca-paper`, `alpaca-live`, or `robinhood-<last four>`.
+  string executor = 2;
+}
+
+message SessionId {
+  string id = 1;
+}
+
+message SessionStatus {
+  string id = 1;
+  string finding = 2;
+  string executor = 3;
+  string instrument = 4;
+  string strategy = 5;
+  string started_at = 6;
+  // starting, running, halted, stopped or failed.
+  string state = 7;
+  uint32 signals = 8;
+  uint32 submitted = 9;
+  uint32 refused = 10;
+  uint32 fills = 11;
+  // Why the gate halted, when it did.
+  optional string halted = 12;
+  optional string last_error = 13;
+  optional string last_bar = 14;
+}
+
+message SessionList {
+  repeated SessionStatus sessions = 1;
+}

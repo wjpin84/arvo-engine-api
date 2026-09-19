@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package arvo.views.v1;
+
+// Same package as the other view files: one namespace, split by domain so
+// a reader finds a shape where its subject lives.
+
+// The engine's own moving parts, as a front end shows them.
+
+message JobView {
+  string id = 1;
+  string label = 2;
+  // The project script this job runs, when it is a scheduled script
+  // rather than one of the runtime's own. `None` for a built-in.
+  optional string script = 3;
+  // The cron expression it runs on, as the person wrote it. `None` for a
+  // job on a fixed interval, where `every_secs` is the cadence.
+  optional string cron = 4;
+  uint64 every_secs = 5;
+  bool running = 6;
+  uint32 runs = 7;
+  optional string last_started = 8;
+  optional string last_finished = 9;
+  // One line from the last run that succeeded.
+  optional string last_result = 10;
+  // Why the last run failed, when it did.
+  optional string last_error = 11;
+  optional string next_run = 12;
+}
+
+message PluginStatusView {
+  oneof of {
+    PluginStatusViewReachable reachable = 1;
+    PluginStatusViewUnreachable unreachable = 2;
+  }
+}
+
+message PluginStatusViewReachable {
+  string name = 1;
+  string version = 2;
+  repeated string capabilities = 3;
+}
+
+message PluginStatusViewUnreachable {
+  string reason = 1;
+}
+
+message PluginView {
+  string id = 1;
+  string address = 2;
+  PluginStatusView status = 3;
+}
+
+// A finding's caveat, against the script line that produced the finding:
+// what the Problems panel lists with source "Arvo" (ADR-0021).
+message ResearchProblemView {
+  // Relative to the project folder.
+  string path = 1;
+  uint32 line = 2;
+  // `error`, `warning` or `info`.
+  string severity = 3;
+  string message = 4;
+  // The finding it comes from, to open.
+  string finding = 5;
+}
+
+// One signal a plugin publishes, as it stands right now (#163).
+//
+// A signal that is declared and has no value is shown with none, not with
+// a zero and not with whatever it last said. That is the invariant made
+// visible: a reader looking at this list should be able to see the
+// difference between "nothing to say" and "saying nothing has changed".
+message SignalView {
+  string name = 1;
+  string description = 2;
+  // Whether each value is computed from what was known at that instant.
+  // A study may gate on a causal signal and never on a descriptive one.
+  bool causal = 3;
+  // Why it is not causal, in the provider's own words. Empty when it is.
+  string because = 4;
+  // What computes it, by name and version.
+  string engine = 5;
+  // The instant the value describes, empty when there is no value.
+  string at = 6;
+  // `None` is the answer for a signal that is declared and silent, and
+  // for one whose provider has gone away.
+  optional double value = 7;
+}
+
+// One strategy an extension contributes as a document (#162).
+//
+// Data Arvo reads, like a theme: there is no code in it and none runs in
+// the window. A document this build cannot offer is listed with the reason
+// rather than dropped, so a person can see why their catalog is one entry
+// short.
+message StrategyContributionView {
+  // Namespaced by its extension: `their-catalog.fast-cross`.
+  string id = 1;
+  string label = 2;
+  string premise = 3;
+  // `grid` or `rules`, as the document names its kind.
+  string kind = 4;
+  string interval = 5;
+  // Configurations the search holds; zero for a kind that is not a grid.
+  uint32 configurations = 6;
+  // Why it is not in the strategy picker. `None` means it is.
+  optional string problem = 7;
+}

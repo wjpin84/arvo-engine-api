@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package arvo.platform.v1;
+
+// The engine itself: its jobs, its plugins, and the accounts it holds
+// credentials for.
+//
+// `platform`, not `plugin`: `arvo.plugin.v1` is the provider contract in
+// arvo-extension-api, and one name cannot mean two things.
+
+message JobId {
+  string id = 1;
+}
+
+message VendorId {
+  string vendor = 1;
+}
+
+message VendorProfile {
+  string vendor = 1;
+  // Which sub-account, for a vendor that has them (Alpaca's paper and live).
+  optional string profile = 2;
+}
+
+message AccountKeys {
+  string vendor = 1;
+  optional string profile = 2;
+  string key_id = 3;
+  string secret = 4;
+}
+
+message SignIn {
+  // Where to send the person. The caller opens it: the engine binds the
+  // loopback listener and exchanges the code, but opening a browser is the
+  // front end's job (ADR-0028).
+  string url = 1;
+}

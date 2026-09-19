@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package arvo.portfolio.v1;
+
+// What is held.
+
+message PortfolioName {
+  string name = 1;
+}

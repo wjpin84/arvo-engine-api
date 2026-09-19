@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package arvo.common.v1;
+
+// Shapes with no domain of their own.
+//
+// There is no error message here on purpose: a refusal crosses as a gRPC
+// status code, one per kind, which is the same rule a provider follows.
+
+message Empty {}
+
+// A workbench view, as `arvo_views` serialises it. Carried whole: the window
+// renders these shapes and links the crate that defines them, so it decodes
+// one field instead of the proto restating two thousand lines of view types.
+// `kind` names the type, for a reader without the crate.
+message View {
+  string kind = 1;
+  string json = 2;
+}
+
+// A file the engine wrote, for a front end to reveal or open. A path rather
+// than bytes: the engine is one process per user on this machine (ADR-0018),
+// so a path means the same thing on both sides, and an export exists on disk
+// precisely so a person can find it twice.
+message ExportedPath {
+  string path = 1;
+}

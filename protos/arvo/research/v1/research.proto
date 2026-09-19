@@ -1,0 +1,285 @@
+syntax = "proto3";
+
+package arvo.research.v1;
+
+// Findings, the rules that produce them, and what a run is held to.
+
+message Strategy {
+  string name = 1;
+  string label = 2;
+  // The resolution it runs at, e.g. "1d" or "5m".
+  string interval = 3;
+  // What the rule claims about how prices behave.
+  string premise = 4;
+  // True when the rule ranks instruments against each other and needs a set.
+  bool ranks_a_set = 5;
+  // Backtests one study runs: what a front end's progress indicator promises.
+  uint32 backtests = 6;
+}
+
+message Strategies {
+  repeated Strategy strategies = 1;
+}
+
+message FindingSummary {
+  string id = 1;
+  // What was run, e.g. "study", "walk-forward" or "panel".
+  string kind = 2;
+  string subject = 3;
+  // "Supported", "NotSupported" or "Inconclusive".
+  string verdict = 4;
+  // RFC 3339.
+  string recorded_at = 5;
+  // The agent or script that ran it; empty for a person.
+  string author = 6;
+}
+
+message Findings {
+  repeated FindingSummary findings = 1;
+  // Records in the evidence store that could not be read.
+  uint32 unreadable = 2;
+}
+
+message FindingId {
+  string id = 1;
+}
+
+message FindingIds {
+  repeated string ids = 1;
+}
+
+message Advice {
+  // "blocking", "warning" or "note".
+  string severity = 1;
+  string finding = 2;
+  string action = 3;
+  string evidence = 4;
+}
+
+// One finding: the verdict and how far it may be read, before any number.
+message Finding {
+  FindingSummary summary = 1;
+  // A plain instruction on how far the verdict may be read. Read first.
+  string read_this_first = 2;
+  repeated string reasons = 3;
+  repeated Advice advice = 4;
+  // The numbers, which differ by kind: the search and the out-of-sample
+  // metrics for a study, the stitched record for a walk-forward, the pooled
+  // outcome for a panel. JSON, so a new number is not a new message.
+  string detail_json = 5;
+  // Files kept with the finding (#157).
+  repeated Attachment attachments = 6;
+}
+
+// One file kept with a finding: bytes stored once by content hash, listed
+// on the record.
+message Attachment {
+  string name = 1;
+  string media_type = 2;
+  // blake3 of the bytes, hex.
+  string hash = 3;
+  uint64 bytes = 4;
+  // RFC 3339.
+  string added_at = 5;
+}
+
+// A file to keep with a finding the caller already recorded or ran.
+message AttachRequest {
+  string finding_id = 1;
+  // As the author names it: `report.md`, `equity.png`.
+  string name = 2;
+  // `text/markdown`, `image/png`; empty means application/octet-stream.
+  string media_type = 3;
+  bytes data = 4;
+}
+
+message Attachments {
+  repeated Attachment attachments = 1;
+}
+
+message AttachmentRef {
+  string finding_id = 1;
+  string hash = 2;
+}
+
+message RunRequest {
+  string instrument = 1;
+  string strategy = 2;
+  // Who is running this, e.g. "script:momentum-scan". Required: a run is
+  // saved as this author's and deflated against everything the author has
+  // run, so a script iterating until something passes does not make it pass.
+  string author = 3;
+  // Where in the author's code the call was made, as "path:line", so the
+  // workbench can put the finding's caveats against that line. Optional.
+  string origin = 4;
+}
+
+message StudyRequest {
+  string instrument = 1;
+  // A rule or ruleset name; the default rule when absent.
+  optional string strategy = 2;
+}
+
+message BookRequest {
+  repeated string instruments = 1;
+  optional string strategy = 2;
+  optional uint32 max_concurrent_positions = 3;
+  optional uint32 max_per_sector = 4;
+}
+
+message SharedExperiment {
+  // The file's text, as the person pasted or opened it.
+  string text = 1;
+  string instrument = 2;
+}
+
+// One point of an equity curve. `at` is `YYYY-MM-DDTHH:MM:SS` or a date.
+message Point {
+  string at = 1;
+  double equity = 2;
+}
+
+// One trade in a ledger: a round trip, or a position still open at the end
+// (empty `closed`, no `exit`).
+message LedgerTrade {
+  // `SYMBOL.VENUE`; empty when it is the experiment's own instrument.
+  string instrument = 1;
+  string opened = 2;
+  string closed = 3;
+  // "long" or "short"; empty means long.
+  string direction = 4;
+  double quantity = 5;
+  double entry = 6;
+  optional double exit = 7;
+  double pnl = 8;
+  double commission = 9;
+  // "signal", "stop", "halted", "expired" or "still_open"; empty means signal.
+  string exit_reason = 10;
+}
+
+// Evidence an engine Arvo did not run computed (ADR-0026). What a run
+// produces, before anyone concludes anything from it; Arvo computes the
+// verdict. There is no field for a verdict, a metric or a p-value.
+message ReportRequest {
+  // As RunRequest: who is recording this, and where in their code.
+  string author = 1;
+  string origin = 2;
+  // The hypothesis: an id, and the claim in prose.
+  string hypothesis_id = 3;
+  string claim = 4;
+  // The experiment as data.
+  string instrument = 5;
+  // ISO dates, inclusive.
+  string from = 6;
+  string to = 7;
+  // As arvo_data spells it: "1day", "5minute".
+  string interval = 8;
+  // The engine's own dataset: an id, and a content hash of what it read.
+  string dataset_id = 9;
+  string dataset_version = 10;
+  // "split" (the default) or "total_return".
+  string adjustment = 11;
+  // The engine's own strategy name, and its parameters.
+  string strategy = 12;
+  map<string, double> params = 13;
+  // The cost model the run assumed.
+  double commission_bps = 14;
+  double slippage_bps = 15;
+  double per_fill = 16;
+  // The risk model, as far as the run assumed one.
+  optional double stop_atr_multiple = 17;
+  // Zero means the curve's first point.
+  double starting_cash = 18;
+  // What computed this, by name and version.
+  string engine = 19;
+  // The evidence.
+  repeated Point strategy_curve = 20;
+  repeated LedgerTrade ledger = 21;
+  // Buy-and-hold over the same window and capital. Without it the finding
+  // is Inconclusive: a return with nothing to beat is not a result.
+  repeated Point benchmark_curve = 22;
+  // How many trials the author's whole search has run (ADR-0014).
+  optional uint32 trials = 23;
+}
+
+message ReportFigure {
+  string finding_id = 1;
+  // The equity chart the front end captured, base64 PNG. Absent is a report
+  // with no figure, not an error: only a window can draw one.
+  optional string figure = 2;
+}
+
+message TradeExport {
+  string name = 1;
+  // The rows as the front end has them, in the order it is showing them:
+  // `Vec<TradeRowExport>` as JSON. The engine does not derive these from the
+  // finding, because the sort order is the view's.
+  string rows_json = 2;
+}
+
+// A ruleset parameter: one value fixes it, several search it.
+message Param {
+  string name = 1;
+  repeated double values = 2;
+}
+
+message Fixed {
+  string name = 1;
+  double value = 2;
+}
+
+// One file under <project>/rulesets/, as the picker sees it.
+message Ruleset {
+  string path = 1;
+  string name = 2;
+  string label = 3;
+  string rule = 4;
+  string interval = 5;
+  uint32 searches = 6;
+  // Why it cannot be run, when it cannot.
+  optional string problem = 7;
+}
+
+message Rulesets {
+  repeated Ruleset rulesets = 1;
+}
+
+message RulesetPath {
+  string path = 1;
+}
+
+// A grid ruleset's parts, for a form.
+message RulesetForm {
+  string name = 1;
+  string rule = 2;
+  string label = 3;
+  string premise = 4;
+  repeated Param params = 5;
+}
+
+// A rule this build implements, with the search it ships.
+message Rule {
+  string name = 1;
+  string label = 2;
+  string premise = 3;
+  string interval = 4;
+  repeated Fixed fixed = 5;
+  repeated Param axes = 6;
+  bool ranks_a_set = 7;
+  bool trades_options = 8;
+}
+
+message Rules {
+  repeated Rule rules = 1;
+}
+
+// The project's risk file (.arvo/risk.json), as read for the next study.
+message RiskModel {
+  string path = 1;
+  bool exists = 2;
+  // The model in force, as JSON: the file's when it reads, the shipped one
+  // when it does not.
+  string model_json = 3;
+  // Why the file was refused, when it was.
+  optional string error = 4;
+}

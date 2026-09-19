@@ -1,0 +1,691 @@
+syntax = "proto3";
+
+package arvo.views.v1;
+
+import "arvo/views/v1/market.proto";
+
+// What a front end renders.
+//
+// These are the shapes the engine answers with. They are here rather than
+// in a Rust crate both sides link so that the contract has no language in
+// it: a front end in any language generates these and reads a finding
+// natively (#127).
+//
+// Generated once from `arvo-views`, then maintained here. Field numbers are
+// the contract; add, never renumber.
+// A parameter and its value, in the order a run chose them. Ordered, so a
+// repeated field rather than a map.
+
+// What a research run produced, as a front end shows it.
+
+// The dividend bias, measured.
+//
+// On split-adjusted prices no dividend is paid to anything in a backtest.
+// Both sides forgo them — but the benchmark held through every ex-date and a
+// rule in the market some of the time did not, so the margin between them is
+// overstated in the strategy's favour, and [`Self::corrected_excess`] takes it
+// off. On total-return prices the distributions are already in the returns and
+// the same measurement describes what the margin is made of instead.
+// A study's result after tax. See `arvo_research::tax` for what is modelled.
+message AfterTaxView {
+  double strategy_return = 1;
+  double benchmark_return = 2;
+  // `strategy_return - benchmark_return`: the margin a taxable account
+  // would actually have kept.
+  double excess = 3;
+  double strategy_tax = 4;
+  double benchmark_tax = 5;
+  double short_term_rate = 6;
+  double long_term_rate = 7;
+}
+
+// One file kept with a finding (#157).
+message AttachmentView {
+  string name = 1;
+  string media_type = 2;
+  // What the file is stored under; what `open_attachment` takes.
+  string hash = 3;
+  uint64 bytes = 4;
+  string added_at = 5;
+}
+
+// What one account holding every member of a panel would have done.
+//
+// The panel's pooled figures average its members. This combines them, which
+// is a different number in the place that matters: falls that did not
+// coincide hurt a book less than they hurt its average member.
+message BookView {
+  MetricsView metrics = 1;
+  // Mean member drawdown less the book's. Positive is diversification;
+  // zero or below means the members fell together and the panel was one bet.
+  double diversification = 2;
+}
+
+// How much of a panel's apparent breadth is real.
+//
+// The pooled statistics read as evidence in proportion to the instrument
+// count — three that agree feel like three times the confidence of one. They
+// are not, if the three moved together.
+message BreadthView {
+  repeated string instruments = 1;
+  // Square and symmetric. `None` where a pair had too little overlap to
+  // say — which is different from a correlation of zero.
+  repeated CorrelationRow correlations = 2;
+  optional double mean_correlation = 3;
+  // How many independent instruments the panel behaves like.
+  optional double effective = 4;
+  // How much the pooled average's certainty is overstated by counting
+  // instruments instead of independent ones.
+  optional double overstatement = 5;
+}
+
+// One finding in a side-by-side comparison.
+message ComparisonRowView {
+  string id = 1;
+  string subject = 2;
+  string kind = 3;
+  string strategy_name = 4;
+  string verdict = 5;
+  string recorded_at = 6;
+  double total_return = 7;
+  double excess_return = 8;
+  optional double sharpe = 9;
+  double max_drawdown = 10;
+  uint32 trades = 11;
+  optional double win_rate = 12;
+  optional double profit_factor = 13;
+  // Whether the data behind it has changed since it was recorded.
+  optional bool stale = 14;
+}
+
+// Several findings, read against each other.
+message ComparisonView {
+  repeated ComparisonRowView rows = 1;
+  repeated NamedCurveView curves = 2;
+  // The best out-of-sample Sharpe among them, and the score the best of a
+  // comparison this size would be expected to reach with no skill at all.
+  //
+  // The point of the whole screen. Comparing six strategies and keeping the
+  // best one is a search of size six, and until now nothing counted it:
+  // each finding deflated the grid *inside* it and none of them knew about
+  // the other five.
+  optional double best_sharpe = 3;
+  optional double expected_best_under_null = 4;
+  bool survived_deflation = 5;
+  // What is worth saying about the comparison itself.
+  repeated string notes = 6;
+}
+
+// One row of a correlation matrix. A cell with no value is a pair with too
+// little overlap to say anything about, which is not the same as zero.
+message CorrelationRow {
+  repeated OptionalDouble cells = 1;
+}
+
+// One point on a curve, in the shape a chart library wants: an ISO date and
+// a value.
+message CurvePoint {
+  // Seconds since the epoch, not a date string.
+  //
+  // A date was enough while every curve was daily and is not once two
+  // points can share a day: the chart keys points by time, so an intraday
+  // series collapsed to dates loses every point but the last of each day.
+  // The previous version did exactly that, deliberately and with a comment
+  // saying so — this is what removing the limitation instead looks like.
+  int64 time = 1;
+  double value = 2;
+}
+
+// Where a replay first stopped matching the record.
+message DivergenceView {
+  string what = 1;
+  optional uint32 at = 2;
+  optional string when = 3;
+  double recorded = 4;
+  double replayed = 5;
+  // Gap relative to the recorded value, so a report can separate a
+  // rounding difference from a different answer.
+  double relative = 6;
+}
+
+message DividendGapView {
+  // Distributions that went ex inside the window.
+  //
+  // Zero is a real answer and a good one: these instruments pay nothing, so
+  // the margin needs no correction.
+  uint32 events = 1;
+  double strategy_income = 2;
+  double benchmark_income = 3;
+  // The gap as a fraction of starting capital, in the same units as the
+  // excess return it comes off.
+  double overstatement = 4;
+  // The excess return with the gap taken out, where taking it out means
+  // anything.
+  //
+  // `None` on a total-return dataset: the distributions are already in the
+  // excess return there, so subtracting the gap again would report a margin
+  // smaller than the account earned. The rest of this view still holds —
+  // only the subtraction stops being valid.
+  optional double corrected_excess = 5;
+  // False when some instrument the run held has no distribution series, in
+  // which case the figure is a floor rather than the answer.
+  bool complete = 6;
+  uint32 covered = 7;
+  uint32 instruments = 8;
+}
+
+// One fold of a walk-forward, flattened for display.
+message FoldView {
+  string chose_on = 1;
+  string judged_on = 2;
+  repeated NamedNumber params = 3;
+  double strategy_return = 4;
+  double benchmark_return = 5;
+  uint32 trades = 6;
+  // Whether this fold's winner beat what a no-skill search of that size
+  // would produce. Per fold, because a procedure that selects noise in most
+  // periods has not been shown to select.
+  bool survived_deflation = 7;
+}
+
+message HistoryEntryView {
+  string id = 1;
+  string kind = 2;
+  string subject = 3;
+  string verdict = 4;
+  string recorded_at = 5;
+  // True when the data this was produced from no longer matches disk.
+  // `None` when the data it referenced can no longer be found at all.
+  optional bool stale = 6;
+  // The agent that ran it, or `None` for a person. `default` for a view
+  // built before agents could run research.
+  optional string agent = 7;
+  // Where the agent's code asked for it, as `path:line`, when it said.
+  optional string origin = 8;
+  // The size of the search an agent's finding was held to.
+  optional uint32 trials = 9;
+  // How many files are kept with it (#157).
+  uint32 attachments = 10;
+}
+
+// What the workbench shows before anything has been run.
+// Everything in research memory, and what could not be read of it.
+message HistoryView {
+  repeated HistoryEntryView entries = 1;
+  repeated UnreadableView unreadable = 2;
+}
+
+// What one member of a book actually contributed.
+//
+// A book reports one return for several instruments, and the single most
+// useful question about it is which of them produced that return. The panel
+// answers the same question by running members separately; a book cannot,
+// because the members interfere — so it has to be read out of the ledger.
+message MemberView {
+  string instrument = 1;
+  uint32 trades = 2;
+  // Realised profit, net of what the venue charged.
+  double pnl = 3;
+  // This member's share of the book's total realised profit.
+  //
+  // `None` when the book realised nothing at all, rather than a share of
+  // zero — which would read as a measurement.
+  optional double share = 4;
+  // True when the member never opened a position.
+  //
+  // The failure mode a shared account introduces: an instrument that was
+  // asked for, funded by nothing, and silently absent from every number.
+  bool silent = 5;
+}
+
+message MetricsView {
+  double total_return = 1;
+  double cagr = 2;
+  double max_drawdown = 3;
+  double volatility = 4;
+  optional double sharpe = 5;
+  optional double sortino = 6;
+  optional double calmar = 7;
+  // Probability the true Sharpe is above zero, given the sample.
+  //
+  // The second number a Sharpe needs. 1.2 from forty returns and 1.2 from
+  // four thousand print identically and are not the same finding.
+  optional double psr = 8;
+  uint32 trades = 9;
+}
+
+// One month of the strategy's return, for the heatmap.
+message MonthlyReturnView {
+  int32 year = 1;
+  uint32 month = 2;
+  double value = 3;
+}
+
+// A named equity curve, for drawing several on one chart.
+message NamedCurveView {
+  string name = 1;
+  repeated CurvePoint points = 2;
+}
+
+// What a front end renders.
+//
+// These are the shapes the engine answers with. They are here rather than
+// in a Rust crate both sides link so that the contract has no language in
+// it: a front end in any language generates these and reads a finding
+// natively (#127).
+//
+// Generated once from `arvo-views`, then maintained here. Field numbers are
+// the contract; add, never renumber.
+// A parameter and its value, in the order a run chose them. Ordered, so a
+// repeated field rather than a map.
+message NamedNumber {
+  string name = 1;
+  double value = 2;
+}
+
+message OptionalDouble {
+  optional double value = 1;
+}
+
+// One instrument's out-of-sample outcome under the panel's configuration.
+message OutcomeView {
+  string instrument = 1;
+  double strategy_return = 2;
+  double benchmark_return = 3;
+  double excess_return = 4;
+  double max_drawdown = 5;
+  uint32 trades = 6;
+}
+
+// A panel study, flattened for display.
+message PanelView {
+  // The stored finding this view came from, so the window can ask for
+  // something to be done to the record it is showing — a report composed
+  // from it, a file kept with it. Empty for a view that was never
+  // recorded. `default` because every view built before this had none.
+  string id = 1;
+  string verdict = 2;
+  repeated string reasons = 3;
+  repeated RecommendationView recommendations = 4;
+  uint32 instruments = 5;
+  uint32 total_trades = 6;
+  double mean_excess_return = 7;
+  uint32 beat_benchmark = 8;
+  double mean_max_drawdown = 9;
+  BreadthView breadth = 10;
+  BookView book = 11;
+  double worst_max_drawdown = 12;
+  uint32 trials = 13;
+  double best_sharpe = 14;
+  optional double expected_best_under_null = 15;
+  bool survived_deflation = 16;
+  string in_sample = 17;
+  string out_of_sample = 18;
+  repeated NamedNumber selected_params = 19;
+  repeated OutcomeView per_instrument = 20;
+  repeated string failures = 21;
+  string dataset_version = 22;
+  string strategy_name = 23;
+  double starting_cash = 24;
+  double commission_bps = 25;
+  double slippage_bps = 26;
+  string engine = 27;
+}
+
+// One thing to do about a finding, flattened for display.
+message RecommendationView {
+  string severity = 1;
+  string finding = 2;
+  string action = 3;
+  string evidence = 4;
+}
+
+// A stored finding, reopened.
+message RecordView {
+  oneof of {
+    StudyView study = 1;
+    PanelView panel = 2;
+    WalkForwardView walkforward = 3;
+    ReportedView reported = 4;
+  }
+}
+
+// What came back from re-running a stored finding.
+//
+// A finding whose numbers cannot be regenerated is not evidence, so this is
+// the check the whole evidence store rests on.
+message ReplayView {
+  // `reproduced`, `data-changed`, `engine-changed`, `diverged`,
+  // `not-replayable` or `failed`. A slug so the window can style it
+  // without parsing prose.
+  string outcome = 1;
+  // Whether the finding still stands. Only a clean reproduction counts:
+  // changed data or a changed engine leaves the claim untested, which is
+  // not the same as confirmed.
+  bool holds = 2;
+  string detail = 3;
+  DivergenceView divergence = 4;
+}
+
+// A finding an engine Arvo did not run computed, judged by Arvo
+// (ADR-0026). Shown as what it is: the numbers and the verdict, and where
+// the data lives.
+message ReportedView {
+  string id = 1;
+  string hypothesis = 2;
+  string claim = 3;
+  string instrument = 4;
+  string engine = 5;
+  string from = 6;
+  string to = 7;
+  string interval = 8;
+  // `id@version`: the engine's own dataset, not in Arvo's library.
+  string dataset = 9;
+  string strategy = 10;
+  string verdict = 11;
+  repeated string reasons = 12;
+  uint32 trades = 13;
+  optional uint32 trials = 14;
+  // Absent when there was no benchmark to judge against.
+  optional double total_return = 15;
+  optional double excess_return = 16;
+  optional double sharpe = 17;
+  optional double max_drawdown = 18;
+  string recorded_at = 19;
+  string author = 20;
+  // The files kept with it: a report, a figure, the trades (#157).
+  repeated AttachmentView attachments = 21;
+}
+
+// How much one parameter moved across the folds.
+message StabilityView {
+  string axis = 1;
+  uint32 distinct = 2;
+  double modal = 3;
+  double modal_share = 4;
+}
+
+// The full result of a study, flattened for display.
+message StudyView {
+  // The stored finding this view came from, so the window can ask for
+  // something to be done to the record it is showing — a report composed
+  // from it, a file kept with it. Empty for a view that was never
+  // recorded. `default` because every view built before this had none.
+  string id = 1;
+  string instrument = 2;
+  // Every instrument the run held, head first.
+  //
+  // One entry is an ordinary study. More than one is a book: the same rule
+  // on several instruments settling against a single account, where a
+  // position one member takes is capital another cannot have.
+  //
+  // `default` because this is a persisted format — a finding recorded
+  // before a run could hold more than one loads as what it was.
+  repeated string instruments = 3;
+  // What each member of a book contributed. Empty for a single study.
+  repeated MemberView members = 4;
+  string verdict = 5;
+  repeated string reasons = 6;
+  uint32 trials = 7;
+  // Configurations tried elsewhere before a shared experiment arrived,
+  // counted into the bar. `default`: a view built before sharing had none.
+  uint32 prior_trials = 8;
+  double best_sharpe = 9;
+  optional double expected_best_under_null = 10;
+  bool survived_deflation = 11;
+  // Every configuration the search tried, not only the one it picked.
+  SurfaceView surface = 12;
+  string in_sample = 13;
+  string out_of_sample = 14;
+  repeated NamedNumber selected_params = 15;
+  MetricsView strategy = 16;
+  MetricsView benchmark = 17;
+  // Uncorrected. [`Self::dividend_gap`] sits beside it rather than being
+  // folded in: a number silently adjusted by something the reader cannot see
+  // is what this platform exists to stop.
+  double excess_return = 18;
+  // How much of that margin is the dividend bias rather than skill.
+  //
+  // `None` means it was never measured — no distribution series is held for
+  // these instruments. The bias is real either way; only its size is
+  // unknown, and `recommendations` says so.
+  DividendGapView dividend_gap = 19;
+  // Both sides after capital-gains tax at stated rates, sold at the end
+  // (#26). Beside the excess return for the same reason as the dividend
+  // gap. `None` when the curves are too short to tax.
+  AfterTaxView after_tax = 20;
+  // The two curves behind the numbers. A table says a strategy returned
+  // less than the market; a chart says whether it did so steadily or lost
+  // it all in one month, and those are different findings.
+  repeated CurvePoint strategy_curve = 21;
+  repeated CurvePoint benchmark_curve = 22;
+  // The instrument's own bars over the judged period, with every entry and
+  // exit marked on them.
+  //
+  // The view that shows what the rule *did* rather than what it added up
+  // to. A summary cannot say the entries all landed on three days, or that
+  // every winner came out of one gap; this says it at a glance.
+  repeated CandlePoint price = 23;
+  repeated TradeMarkerView markers = 24;
+  // The rest of a book's instruments, each with its own bars and its own
+  // trades. Empty for a single study.
+  //
+  // The head instrument is deliberately *not* repeated here — it is already
+  // [`Self::price`] and [`Self::markers`] above. The shape mirrors
+  // `Experiment.alongside`, which is head plus the rest for the same reason:
+  // carrying the head twice would put a third of a three-member book's
+  // candles on the wire for nothing.
+  repeated InstrumentChartView alongside_charts = 25;
+  // Depth below the running peak, as a percentage.
+  repeated CurvePoint underwater = 26;
+  // What is wrong with the bars this was produced from.
+  repeated DataFindingView data_findings = 27;
+  // Every round trip, so nobody has to take the summary on trust.
+  repeated TradeRowView trades = 28;
+  // Month-by-month, so a total return can be read as steady or as one
+  // lucky quarter. Derived from the same curve, not a second measurement.
+  repeated MonthlyReturnView monthly = 29;
+  // The round trips behind the return, and what they cost.
+  TradesView trades_detail = 30;
+  // What to do about this finding, most stopping first.
+  //
+  // Derived on read rather than stored, so a finding pulled out of memory
+  // is read against today's rules rather than the ones in force when it
+  // was recorded.
+  repeated RecommendationView recommendations = 31;
+  // The dataset this result was produced from, as a content hash. Compared
+  // against the live one to decide whether the result is still current.
+  string dataset_version = 32;
+  string strategy_name = 33;
+  double starting_cash = 34;
+  double commission_bps = 35;
+  double slippage_bps = 36;
+  string engine = 37;
+}
+
+// One configuration's cell on the search surface.
+message SurfaceCell {
+  double x = 1;
+  double y = 2;
+  double sharpe = 3;
+  // Whether this is the configuration that was chosen.
+  bool selected = 4;
+  // Whether it beat what a no-skill search of this size would produce.
+  //
+  // The distinction the whole chart is drawn around. A cell below the bar
+  // is not a weak result, it is *not a result* — a score a coin-flipping
+  // search of the same size would have been expected to reach anyway.
+  bool above_null = 5;
+}
+
+// The in-sample score of every configuration the search tried.
+//
+// # Why this exists at all
+//
+// Reporting only the winner shows two completely different situations
+// identically: a broad region of configurations that all scored well, which
+// suggests something real and robust to the exact parameters; and one bright
+// cell surrounded by nothing, which is what fitting noise looks like from
+// above. The verdict machinery already deflates for the *size* of the search;
+// this is the part a person has to look at.
+message SurfaceView {
+  // The two axes drawn, by name.
+  string x_axis = 1;
+  string y_axis = 2;
+  repeated double x_values = 3;
+  repeated double y_values = 4;
+  repeated SurfaceCell cells = 5;
+  // The bar a cell has to clear to be worth anything. `None` when there
+  // were too few trials to say.
+  optional double null_bar = 6;
+  double best = 7;
+  // Axes not drawn, because a surface has two dimensions and a grid may
+  // have more. Named so nobody reads the chart as the whole search.
+  repeated string collapsed = 8;
+}
+
+// Where a trade happened, to be drawn on the price.
+message TradeMarkerView {
+  int64 time = 1;
+  // `entry` or `exit`; the chart decides shape and side from it.
+  string kind = 2;
+  // `stop` or `signal` for an exit, so a stop-out is visually distinct
+  // from a rule that chose to leave. Empty for an entry.
+  string reason = 3;
+  string label = 4;
+}
+
+// One round trip, as a table row.
+//
+// Every field the ledger holds, because the point of a table is that nobody
+// has to decide in advance which column someone will want to sort by. The
+// aggregate statistics above it answer "how did it do"; this answers "what
+// did it actually do", and those are different questions with different
+// failure modes — an expectancy of +£300 built from one +£9,000 trade and
+// nineteen losses is a fact only the rows show.
+message TradeRowView {
+  // Which instrument this round trip was in.
+  //
+  // Empty for a run recorded before the ledger named instruments, and for
+  // an ordinary single-instrument study where the subject line already
+  // says it. Only a book shows the column.
+  string instrument = 1;
+  string opened = 2;
+  // Empty while the position is still open at the end of the run.
+  string closed = 3;
+  string direction = 4;
+  double quantity = 5;
+  double entry = 6;
+  // `None` while still open, so the table shows a gap rather than a price
+  // nobody traded at.
+  optional double exit = 7;
+  double pnl = 8;
+  double commission = 9;
+  // Days held. Fractional, because an intraday trade held forty minutes is
+  // not "0 days" — it is 0.03, and rounding it away would make every
+  // intraday ledger look like a column of zeroes.
+  optional double held_days = 10;
+  // `signal`, `stop`, or `open`.
+  string exit_reason = 11;
+}
+
+// What the round trips looked like, flattened for display.
+//
+// Beside the metrics rather than inside them: metrics come from the equity
+// curve and these come from the ledger, and keeping the two apart is what
+// makes it obvious which is which when they say different things.
+message TradesView {
+  uint32 closed = 1;
+  uint32 still_open = 2;
+  optional double win_rate = 3;
+  optional double profit_factor = 4;
+  optional double expectancy = 5;
+  optional double average_win = 6;
+  optional double average_loss = 7;
+  // Mean holding period in days, which is the unit a reader thinks in and
+  // the one that decides short- versus long-term tax treatment.
+  optional double average_holding_days = 8;
+  // Every fee and commission the venue charged, in account currency.
+  //
+  // Fees only — slippage is charged inside the fill prices and is already
+  // reflected in the return, not here. Naming this `fees` rather than
+  // `cost` is the whole point: a reader who took it for the total cost of
+  // trading would be short by the spread assumption on every round trip.
+  double fees_paid = 9;
+  // Fees as a fraction of starting capital, so they can be read against
+  // the return directly.
+  double fees_fraction = 10;
+  uint32 signal_exits = 11;
+  uint32 stop_exits = 12;
+}
+
+// A finding that could not be read, and why.
+//
+// Shown rather than logged. Four findings were once lost to a field rename
+// and the only trace was a warning nobody had reason to look at — a research
+// store that quietly forgets things is worse than one that says it has.
+message UnreadableView {
+  string id = 1;
+  string reason = 2;
+}
+
+// A walk-forward run, flattened for display.
+message WalkForwardView {
+  // The stored finding this view came from, so the window can ask for
+  // something to be done to the record it is showing — a report composed
+  // from it, a file kept with it. Empty for a view that was never
+  // recorded. `default` because every view built before this had none.
+  string id = 1;
+  string instrument = 2;
+  string verdict = 3;
+  repeated string reasons = 4;
+  repeated RecommendationView recommendations = 5;
+  repeated FoldView folds = 6;
+  uint32 folds_surviving_deflation = 7;
+  // Folds in which the selected configuration never opened a position — the
+  // symptom of a step too short for the rule's warm-up.
+  uint32 folds_without_trades = 8;
+  // How the selection moved. The thing only a rolling procedure can show.
+  repeated StabilityView stability = 9;
+  MetricsView strategy = 10;
+  MetricsView benchmark = 11;
+  double excess_return = 12;
+  repeated CurvePoint strategy_curve = 13;
+  repeated CurvePoint benchmark_curve = 14;
+  repeated CandlePoint price = 15;
+  repeated TradeMarkerView markers = 16;
+  repeated CurvePoint underwater = 17;
+  // What is wrong with the bars this was produced from.
+  repeated DataFindingView data_findings = 18;
+  repeated TradeRowView trades = 19;
+  TradesView trades_detail = 20;
+  int64 in_sample_days = 21;
+  int64 step_days = 22;
+  bool anchored = 23;
+  string dataset_version = 24;
+  string strategy_name = 25;
+  double starting_cash = 26;
+  double commission_bps = 27;
+  double slippage_bps = 28;
+  string engine = 29;
+}
+
+// One bar, as the chart wants it.
+message CandlePoint {
+  int64 time = 1;
+  double open = 2;
+  double high = 3;
+  double low = 4;
+  double close = 5;
+}
+
+// One instrument's bars with its own trades marked on them.
+//
+// A book holds several, and each chart must show only the round trips that
+// happened in *its* instrument. Plotting the whole ledger on one member's
+// prices puts entries on days that instrument never traded.
+message InstrumentChartView {
+  string instrument = 1;
+  repeated CandlePoint price = 2;
+  repeated TradeMarkerView markers = 3;
+}
