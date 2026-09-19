@@ -266,6 +266,32 @@ message RiskModel {
   optional string error = 4;
 }
 
+// A workbench view, as `arvo_views` serialises it. Carried whole: the window
+// renders these shapes and links the crate that defines them, so it decodes
+// one field instead of the proto restating two thousand lines of view types.
+// `kind` names the type, for a reader without the crate.
+message View {
+  string kind = 1;
+  string json = 2;
+}
+
+message StudyRequest {
+  string instrument = 1;
+  // A rule or ruleset name; the default rule when absent.
+  optional string strategy = 2;
+}
+
+message BookRequest {
+  repeated string instruments = 1;
+  optional string strategy = 2;
+  optional uint32 max_concurrent_positions = 3;
+  optional uint32 max_per_sector = 4;
+}
+
+message FindingIds {
+  repeated string ids = 1;
+}
+
 service Research {
   rpc ListStrategies(Empty) returns (Strategies);
   rpc ListInstruments(Empty) returns (Instruments);
@@ -290,6 +316,18 @@ service Research {
   rpc WriteRuleset(RulesetForm) returns (Ruleset);
   rpc ListRules(Empty) returns (Rules);
   rpc GetRiskModel(Empty) returns (RiskModel);
+  // The workbench's own views (#127 stage 2): what the window renders, from
+  // the same runs an agent's RunStudy performs.
+  rpc ViewStudy(StudyRequest) returns (View);
+  rpc ViewWalkForward(StudyRequest) returns (View);
+  rpc ViewPanel(Empty) returns (View);
+  rpc ViewBook(BookRequest) returns (View);
+  rpc ViewHistory(Empty) returns (View);
+  rpc ViewRecord(FindingId) returns (View);
+  rpc ViewReplay(FindingId) returns (View);
+  rpc ViewComparison(FindingIds) returns (View);
+  rpc ViewProblems(Empty) returns (View);
+  rpc ListAttachments(FindingId) returns (Attachments);
 }
 
 // ---------------------------------------------------------------- control --
