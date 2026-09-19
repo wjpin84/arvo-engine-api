@@ -199,6 +199,73 @@ message ReportRequest {
   optional uint32 trials = 23;
 }
 
+// A ruleset parameter: one value fixes it, several search it.
+message Param {
+  string name = 1;
+  repeated double values = 2;
+}
+
+message Fixed {
+  string name = 1;
+  double value = 2;
+}
+
+// One file under <project>/rulesets/, as the picker sees it.
+message Ruleset {
+  string path = 1;
+  string name = 2;
+  string label = 3;
+  string rule = 4;
+  string interval = 5;
+  uint32 searches = 6;
+  // Why it cannot be run, when it cannot.
+  optional string problem = 7;
+}
+
+message Rulesets {
+  repeated Ruleset rulesets = 1;
+}
+
+message RulesetPath {
+  string path = 1;
+}
+
+// A grid ruleset's parts, for a form.
+message RulesetForm {
+  string name = 1;
+  string rule = 2;
+  string label = 3;
+  string premise = 4;
+  repeated Param params = 5;
+}
+
+// A rule this build implements, with the search it ships.
+message Rule {
+  string name = 1;
+  string label = 2;
+  string premise = 3;
+  string interval = 4;
+  repeated Fixed fixed = 5;
+  repeated Param axes = 6;
+  bool ranks_a_set = 7;
+  bool trades_options = 8;
+}
+
+message Rules {
+  repeated Rule rules = 1;
+}
+
+// The project's risk file (.arvo/risk.json), as read for the next study.
+message RiskModel {
+  string path = 1;
+  bool exists = 2;
+  // The model in force, as JSON: the file's when it reads, the shipped one
+  // when it does not.
+  string model_json = 3;
+  // Why the file was refused, when it was.
+  optional string error = 4;
+}
+
 service Research {
   rpc ListStrategies(Empty) returns (Strategies);
   rpc ListInstruments(Empty) returns (Instruments);
@@ -217,6 +284,12 @@ service Research {
   // Keep a file with a finding: a report, a figure, the trades. Stored once
   // by content hash; the finding lists it (#157).
   rpc AttachFile(AttachRequest) returns (Attachments);
+  // The project's rulesets and the rules they may search (#146, #127).
+  rpc ListRulesets(Empty) returns (Rulesets);
+  rpc ReadRuleset(RulesetPath) returns (RulesetForm);
+  rpc WriteRuleset(RulesetForm) returns (Ruleset);
+  rpc ListRules(Empty) returns (Rules);
+  rpc GetRiskModel(Empty) returns (RiskModel);
 }
 
 // ---------------------------------------------------------------- control --
