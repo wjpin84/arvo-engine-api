@@ -427,6 +427,10 @@ message AttachmentRef {
   string hash = 2;
 }
 
+message JobId {
+  string id = 1;
+}
+
 message PortfolioName {
   string name = 1;
 }
@@ -486,6 +490,10 @@ service Data {
   rpc ExportExperiment(FindingId) returns (ExportedPath);
   rpc ComposeReport(ReportFigure) returns (ExportedPath);
   rpc AttachmentPath(AttachmentRef) returns (ExportedPath);
+  // The engine's own background jobs. A front end shows these beside its own:
+  // a job lives where its work does, and the list is a merge.
+  rpc ListJobs(Empty) returns (View);
+  rpc RunJob(JobId) returns (Empty);
 }
 
 service Sessions {
