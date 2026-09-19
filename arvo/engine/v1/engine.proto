@@ -510,4 +510,8 @@ service Sessions {
   // Stops after the current poll. Positions are left as they are.
   rpc StopSession(SessionId) returns (SessionStatus);
   rpc ListSessions(Empty) returns (SessionList);
+  // Stop serving and exit. The front end that started this engine asks before
+  // it kills: a killed process runs no destructors, so the providers it
+  // supervises would be orphaned (ADR-0029, ADR-0023 point 5).
+  rpc Shutdown(Empty) returns (Empty);
 }
