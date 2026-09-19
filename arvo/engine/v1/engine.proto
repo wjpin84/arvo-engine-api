@@ -427,6 +427,21 @@ message AttachmentRef {
   string hash = 2;
 }
 
+// One trade off the live price stream.
+//
+// Typed rather than a View: there are hundreds a minute, and the four fields
+// are the whole of it. Display only — a tick never becomes a bar, because the
+// data library is fetched files with a content hash and that hash is what
+// makes a stored verdict checkable.
+message QuoteTick {
+  string symbol = 1;
+  double price = 2;
+  optional double change = 3;
+  // Whether it came from the regular session rather than a pre- or post-market
+  // print.
+  bool regular = 4;
+}
+
 message JobId {
   string id = 1;
 }
@@ -501,6 +516,11 @@ service Data {
   rpc RefreshPlugins(Empty) returns (View);
   rpc ListSignals(Empty) returns (View);
   rpc ReconcileProviders(Empty) returns (Empty);
+  // The watchlist, and the prices that move under it. `Watchlist` also tells
+  // the engine which symbols to keep the socket subscribed to, so asking for
+  // the rows is what starts the ticks.
+  rpc Watchlist(Empty) returns (View);
+  rpc StreamQuotes(Empty) returns (stream QuoteTick);
 }
 
 service Sessions {
