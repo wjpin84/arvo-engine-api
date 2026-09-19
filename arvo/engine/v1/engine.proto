@@ -25,6 +25,8 @@ message Strategy {
   string premise = 4;
   // True when the rule ranks instruments against each other and needs a set.
   bool ranks_a_set = 5;
+  // Backtests one study runs: what a front end's progress indicator promises.
+  uint32 backtests = 6;
 }
 
 message Strategies {
