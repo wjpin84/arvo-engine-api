@@ -393,6 +393,10 @@ message CompareRequest {
   optional uint32 days = 5;
 }
 
+message PortfolioName {
+  string name = 1;
+}
+
 message VendorId {
   string vendor = 1;
 }
@@ -435,6 +439,11 @@ service Data {
   rpc BeginSignIn(VendorId) returns (SignIn);
   rpc DisconnectAccount(VendorProfile) returns (Empty);
   rpc StoreAccountKeys(AccountKeys) returns (Empty);
+  // Holdings: files the person exported, or ones a connected vendor wrote.
+  // Read-only; nothing here places, cancels or modifies an order.
+  rpc ListPortfolios(Empty) returns (View);
+  rpc SyncAccounts(Empty) returns (View);
+  rpc SyncPortfolio(PortfolioName) returns (View);
 }
 
 service Sessions {
