@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package arvo.services.v1;
+
+import "arvo/common/v1/models.proto";
+import "arvo/platform/v1/models.proto";
+import "arvo/platform/v1/views.proto";
+
+// A person's own scripts: running one, and the cadences they set.
+//
+// Behind the control token. A script runs with the person's privileges, as
+// anything they start from a terminal does (ADR-0018), so starting one is a
+// person's decision and an agent holding `engine.json` cannot reach it.
+//
+// The engine runs them rather than a window, so a cadence goes on being
+// honoured after the window closes. What a script can reach of Arvo is the
+// research API through the `arvo` package, which cannot fetch, trade or name
+// a credential (ADR-0016) — running it here changes none of that.
+service Scripts {
+  // Starts a script and answers with its run number. It returns as soon as
+  // the script is running: output arrives on `WatchOutput`, because a script
+  // that takes a minute must not hold a call open for a minute.
+  rpc RunScript(arvo.platform.v1.ScriptPath) returns (arvo.platform.v1.RunId);
+  // Stops a run. A run that has already ended is not an error.
+  rpc StopScript(arvo.platform.v1.RunId) returns (arvo.common.v1.Empty);
+  // Every line every run prints, until the caller goes away. One stream for
+  // all runs, each line carrying its run number: a front end showing several
+  // at once subscribes once, and one arriving late still sees the rest.
+  rpc WatchOutput(arvo.common.v1.Empty) returns (stream arvo.platform.v1.ScriptOutputView);
+
+  // Every saved schedule, enabled or not.
+  rpc ListScriptJobs(arvo.common.v1.Empty) returns (arvo.platform.v1.ScriptJobsView);
+  // Saves a schedule and starts its timer, replacing any schedule that script
+  // already had. Answers with the whole list, so a caller never has to guess
+  // what the engine now holds.
+  rpc SaveScriptJob(arvo.platform.v1.ScriptSchedule) returns (arvo.platform.v1.ScriptJobsView);
+  // Forgets a script's schedule and stops its timer. The script itself is
+  // left alone: this removes a schedule, not a file.
+  rpc RemoveScriptJob(arvo.platform.v1.ScriptPath) returns (arvo.platform.v1.ScriptJobsView);
+}

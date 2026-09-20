@@ -35,3 +35,27 @@ message SignIn {
   // front end's job (ADR-0028).
   string url = 1;
 }
+
+// A script's path, relative to the project folder. What identifies a
+// schedule: one schedule per script.
+message ScriptPath {
+  string path = 1;
+}
+
+// A run in progress, as `RunScript` numbered it.
+message RunId {
+  uint32 run = 1;
+}
+
+// A cadence a person set for one of their scripts.
+message ScriptSchedule {
+  // Relative to the project folder.
+  string script = 1;
+  // The cadence when no cron expression is set. Kept either way, so
+  // switching to cron and back does not lose what the interval was.
+  uint64 every_secs = 2;
+  // A cron expression as the person wrote it. When set it decides when the
+  // script runs and `every_secs` is not consulted.
+  optional string cron = 3;
+  bool enabled = 4;
+}

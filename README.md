@@ -48,6 +48,7 @@ stated at the top of each file.
 | `Portfolio` | control | what is held, valued |
 | `Platform` | control | jobs and the plugins this engine hosts |
 | `Sessions` | control | a rule trading against a venue, live |
+| `Scripts` | control | a person's own scripts: running one, and the cadences they set |
 
 `Research` is the one an agent reaches. Nothing on it fetches, trades, shares,
 imports, or names a credential, and a test in the engine reads this directory

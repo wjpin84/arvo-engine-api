@@ -244,3 +244,36 @@ enum SeverityView {
   SEVERITY_VIEW_INFO = 1;
   SEVERITY_VIEW_WARNING = 2;
 }
+
+// One scheduled script: a project file the engine runs on a timer.
+//
+// The engine runs it, not a window, so a cadence a person set goes on being
+// honoured after they close the window (ADR-0018). A schedule that only
+// fires while someone is watching is not a schedule.
+message ScriptJobView {
+  // Relative to the project folder, and what identifies the schedule: one
+  // schedule per script.
+  string script = 1;
+  // The cadence when `cron` is unset. Kept either way, so switching to a
+  // cron expression and back does not lose what the interval was.
+  uint64 every_secs = 2;
+  // A cron expression, as the person wrote it. When set it decides when the
+  // script runs and `every_secs` is not consulted.
+  optional string cron = 3;
+  bool enabled = 4;
+}
+
+// Every saved schedule. A list, as a message; see `JobsView`.
+message ScriptJobsView {
+  repeated ScriptJobView jobs = 1;
+}
+
+// One line from a running script, or the fact that it ended.
+message ScriptOutputView {
+  // Which run, as `RunScript` numbered it.
+  uint32 run = 1;
+  // `out`, `err`, `info` (what the engine started) or `exit`.
+  string stream = 2;
+  // The line without its newline; for `exit`, how it ended.
+  string text = 3;
+}
