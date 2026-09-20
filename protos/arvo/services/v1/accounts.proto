@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package arvo.services.v1;
 
-import "arvo/common/v1/common.proto";
-import "arvo/platform/v1/platform.proto";
+import "arvo/common/v1/models.proto";
+import "arvo/platform/v1/models.proto";
 
 // A person's relationship with each vendor.
 //

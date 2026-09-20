@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package arvo.services.v1;
 
-import "arvo/common/v1/common.proto";
-import "arvo/portfolio/v1/portfolio.proto";
+import "arvo/common/v1/models.proto";
+import "arvo/portfolio/v1/models.proto";
 
 // What is held, valued.
 //

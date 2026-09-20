@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package arvo.views.v1;
+package arvo.platform.v1;
 
 // Same package as the other view files: one namespace, split by domain so
 // a reader finds a shape where its subject lives.

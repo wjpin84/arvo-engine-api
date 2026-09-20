@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package arvo.views.v1;
+package arvo.research.v1;
 
-import "arvo/views/v1/market.proto";
+import "arvo/market/v1/views.proto";
 
 // What a front end renders.
 //
@@ -479,7 +479,7 @@ message StudyView {
   // Depth below the running peak, as a percentage.
   repeated CurvePoint underwater = 26;
   // What is wrong with the bars this was produced from.
-  repeated DataFindingView data_findings = 27;
+  repeated arvo.market.v1.DataFindingView data_findings = 27;
   // Every round trip, so nobody has to take the summary on trust.
   repeated TradeRowView trades = 28;
   // Month-by-month, so a total return can be read as steady or as one
@@ -656,7 +656,7 @@ message WalkForwardView {
   repeated TradeMarkerView markers = 16;
   repeated CurvePoint underwater = 17;
   // What is wrong with the bars this was produced from.
-  repeated DataFindingView data_findings = 18;
+  repeated arvo.market.v1.DataFindingView data_findings = 18;
   repeated TradeRowView trades = 19;
   TradesView trades_detail = 20;
   int64 in_sample_days = 21;

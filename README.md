@@ -7,8 +7,10 @@ language generates these and reads a finding natively.
 
 ## What is here
 
-Models by domain, services apart from them, and the shapes a front end renders
-in their own package.
+One package per domain, and the services apart from them. A domain directory
+holds `models.proto`, what the domain is made of, and `views.proto`, what a
+front end renders of it. Both declare the same package, so everything about a
+subject is in one place.
 
 | Package | What it holds |
 | --- | --- |
@@ -18,8 +20,12 @@ in their own package.
 | `arvo.portfolio.v1` | what is held |
 | `arvo.session.v1` | a rule trading against a venue, live |
 | `arvo.platform.v1` | the engine's own jobs, plugins and accounts |
-| `arvo.views.v1` | what a front end renders, split by the same domains |
 | `arvo.services.v1` | the services, one file per domain |
+
+There was an `arvo.views.v1` and there is not any more. A view is a kind of
+message, not a subject, and the tell was `arvo/views/v1/research.proto` next
+to `arvo/research/v1/research.proto`: one word on two axes. Whoever wants
+everything about research now opens one directory.
 
 `platform`, not `plugin`: `arvo.plugin.v1` is the provider contract in the
 other repository, and one name cannot mean two things.
@@ -65,9 +71,9 @@ The engine serves on loopback and admits `authorization: Bearer <token>`.
   directory, reaches the `Research` service. That service is the boundary an
   agent gets: it reads findings and runs studies, and no call on it fetches,
   trades, shares, imports, or names a credential.
-- **The control token**, from `control.json` beside it, reaches `Data` and
-  `Sessions`: the data library, accounts and their credentials, the plugins,
-  the price stream, and live trading. Those are a person's decisions.
+- **The control token**, from `control.json` beside it, reaches every other
+  service: the data library, accounts and their credentials, the plugins, the
+  price stream, and live trading. Those are a person's decisions.
 
 `engine.json` carries the address as well as the token, so a front end that
 can find the file can find the engine. Both files are written by the engine
@@ -79,16 +85,16 @@ Proto3, additively: new fields and new messages, never a renumbering, so a
 client built against an older copy keeps working. The field numbers are the
 contract.
 
-`View { kind, json }` in `engine.proto` is on its way out, replaced by the
-typed messages in `views.proto`. While both exist, `kind` names the message a
-`View` is carrying.
+`View { kind, json }` in `arvo.common.v1` is on its way out, replaced by the
+typed messages in each domain's `views.proto`. While both exist, `kind` names
+the message a `View` is carrying.
 
 ## Generating
 
 Whatever your toolchain does with a `.proto`. For example:
 
 ```
-protoc -I protos --python_out=. --grpc_python_out=. protos/arvo/engine/v1/engine.proto
+protoc -I protos --python_out=. --grpc_python_out=. protos/arvo/services/v1/research.proto
 ```
 
 Rust callers point `tonic-prost-build` at the same directory. The engine and

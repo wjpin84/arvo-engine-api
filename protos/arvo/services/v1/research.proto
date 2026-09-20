@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package arvo.services.v1;
 
-import "arvo/common/v1/common.proto";
-import "arvo/market/v1/market.proto";
-import "arvo/research/v1/research.proto";
+import "arvo/common/v1/models.proto";
+import "arvo/market/v1/models.proto";
+import "arvo/research/v1/models.proto";
 
 service Research {
   rpc ListStrategies(arvo.common.v1.Empty) returns (arvo.research.v1.Strategies);
