@@ -3,6 +3,7 @@ syntax = "proto3";
 package arvo.research.v1;
 
 import "arvo/market/v1/views.proto";
+import "arvo/research/v1/models.proto";
 
 // What a front end renders.
 //
@@ -37,16 +38,6 @@ message AfterTaxView {
   double benchmark_tax = 5;
   double short_term_rate = 6;
   double long_term_rate = 7;
-}
-
-// One file kept with a finding (#157).
-message AttachmentView {
-  string name = 1;
-  string media_type = 2;
-  // What the file is stored under; what `open_attachment` takes.
-  string hash = 3;
-  uint64 bytes = 4;
-  string added_at = 5;
 }
 
 // What one account holding every member of a panel would have done.
@@ -394,7 +385,7 @@ message ReportedView {
   string recorded_at = 19;
   string author = 20;
   // The files kept with it: a report, a figure, the trades (#157).
-  repeated AttachmentView attachments = 21;
+  repeated Attachment attachments = 21;
 }
 
 // How much one parameter moved across the folds.

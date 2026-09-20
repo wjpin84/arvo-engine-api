@@ -211,10 +211,30 @@ message ReportFigure {
 
 message TradeExport {
   string name = 1;
-  // The rows as the front end has them, in the order it is showing them:
-  // `Vec<TradeRowExport>` as JSON. The engine does not derive these from the
-  // finding, because the sort order is the view's.
-  string rows_json = 2;
+  // The rows as the front end has them, in the order it is showing them. The
+  // engine does not derive these from the finding, because the sort order is
+  // the view's, and an export that silently differed from the table above it
+  // would be worse than none.
+  repeated TradeRow rows = 2;
+}
+
+// One round trip, as a trades table shows it and a CSV export writes it.
+message TradeRow {
+  // Which instrument the round trip was in. Empty on an ordinary study,
+  // whose subject line already says; on a book it is the difference between
+  // a usable export and trades from three instruments with no way to tell
+  // them apart.
+  string instrument = 1;
+  string opened = 2;
+  string closed = 3;
+  string direction = 4;
+  double quantity = 5;
+  double entry = 6;
+  optional double exit = 7;
+  double pnl = 8;
+  double commission = 9;
+  optional double held_days = 10;
+  string exit_reason = 11;
 }
 
 // A ruleset parameter: one value fixes it, several search it.
