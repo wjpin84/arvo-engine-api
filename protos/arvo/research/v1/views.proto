@@ -11,7 +11,7 @@ import "arvo/market/v1/views.proto";
 // it: a front end in any language generates these and reads a finding
 // natively (#127).
 //
-// Generated once from `arvo-views`, then maintained here. Field numbers are
+// Generated once from the desktop's Rust, then maintained here. Field numbers are
 // the contract; add, never renumber.
 // A parameter and its value, in the order a run chose them. Ordered, so a
 // repeated field rather than a map.
@@ -274,7 +274,7 @@ message NamedCurveView {
 // it: a front end in any language generates these and reads a finding
 // natively (#127).
 //
-// Generated once from `arvo-views`, then maintained here. Field numbers are
+// Generated once from the desktop's Rust, then maintained here. Field numbers are
 // the contract; add, never renumber.
 // A parameter and its value, in the order a run chose them. Ordered, so a
 // repeated field rather than a map.
