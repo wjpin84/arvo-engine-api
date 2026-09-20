@@ -32,6 +32,18 @@ message FindingSummary {
   string recorded_at = 5;
   // The agent or script that ran it; empty for a person.
   string author = 6;
+  // Which rule or ruleset ran, by the name the picker shows. A ruleset is
+  // the file `rulesets/<name>.json` in the project.
+  string strategy = 7;
+  // The engine build that produced it (#189): the git commit, with `-dirty`
+  // when the tree had uncommitted changes, or `unknown` for a build made
+  // outside a checkout.
+  string code_commit = 8;
+  // The ruleset document's content hash at run time, when the strategy was
+  // a ruleset rather than a shipped rule; empty otherwise. A finding whose
+  // hash no longer matches the file is stale: the rule it measured is not
+  // the rule the file now holds.
+  string ruleset_hash = 9;
 }
 
 message Findings {

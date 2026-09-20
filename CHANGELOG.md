@@ -21,6 +21,18 @@ shipped to a registry yet, so nothing here is a break of anything.
 - **Rust.** `arvo-api` (messages, serde, no transport, builds for
   WebAssembly) and `arvo-client` (stubs, discovery, tokens). Generated code
   is committed; consumers need no protoc.
+- **Provenance (#189).** A finding says what produced it: `strategy`,
+  `code_commit` and `ruleset_hash` on `FindingSummary`, and the same with a
+  `stale_reason` on `HistoryEntryView`. A finding whose ruleset has changed
+  since is stale, like one whose data has.
+- **Provenance (#189).** A finding says what produced it: `strategy`,
+  `code_commit` and `ruleset_hash` on `FindingSummary`, and the same with a
+  `stale_reason` on `HistoryEntryView`. A finding whose ruleset has changed
+  since is stale, like one whose data has.
+- **Provenance (#189).** A finding says what produced it: `strategy`,
+  `code_commit` and `ruleset_hash` on `FindingSummary`, and the same with a
+  `stale_reason` on `HistoryEntryView`. A finding whose ruleset has changed
+  since is stale, like one whose data has.
 - **Python.** The `arvo` package as `arvo-client`: a research client and
   the generated stubs for every service.
 

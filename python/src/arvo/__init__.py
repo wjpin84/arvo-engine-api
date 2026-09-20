@@ -110,6 +110,16 @@ class FindingSummary:
     recorded_at: str
     author: str
     """The agent or script that ran it; empty for a person."""
+    strategy: str = ""
+    """Which rule or ruleset ran, by the name ``strategies()`` shows."""
+    code_commit: str = ""
+    """The engine build that produced it: a git commit, ``-dirty`` when the
+    tree had uncommitted changes, ``unknown`` outside a checkout, empty for a
+    finding recorded before builds were stamped."""
+    ruleset_hash: str = ""
+    """The ruleset document's hash at run time, when the strategy was a
+    ruleset rather than a shipped rule. Two findings with different hashes
+    measured different rules, whatever the ruleset is called."""
 
 
 @dataclass(frozen=True)
@@ -143,6 +153,9 @@ class Finding:
     """How far the verdict may be read. Read before any number."""
     reasons: list[str]
     advice: list[Advice]
+    strategy: str = ""
+    code_commit: str = ""
+    ruleset_hash: str = ""
     detail: dict[str, Any] = field(default_factory=dict)
     """The numbers, which differ by kind: ``search`` and ``out_of_sample`` for
     a study, ``combined`` for a walk-forward, ``pooled`` for a panel."""
@@ -223,7 +236,10 @@ class Engine:
         """Every finding in research memory."""
         reply = self._call(self._stub.ListFindings, pb.Empty())
         return [
-            FindingSummary(f.id, f.kind, f.subject, f.verdict, f.recorded_at, f.author)
+            FindingSummary(
+                f.id, f.kind, f.subject, f.verdict, f.recorded_at, f.author,
+                f.strategy, f.code_commit, f.ruleset_hash,
+            )
             for f in reply.findings
         ]
 
@@ -438,6 +454,9 @@ def _finding(reply: Any) -> Finding:
         read_this_first=reply.read_this_first,
         reasons=list(reply.reasons),
         advice=[Advice(a.severity, a.finding, a.action, a.evidence) for a in reply.advice],
+        strategy=summary.strategy,
+        code_commit=summary.code_commit,
+        ruleset_hash=summary.ruleset_hash,
         detail=json.loads(reply.detail_json) if reply.detail_json else {},
         attachments=[_attachment(a) for a in reply.attachments],
     )

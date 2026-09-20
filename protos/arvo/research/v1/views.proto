@@ -185,8 +185,9 @@ message HistoryEntryView {
   string subject = 3;
   string verdict = 4;
   string recorded_at = 5;
-  // True when the data this was produced from no longer matches disk.
-  // `None` when the data it referenced can no longer be found at all.
+  // True when the data this was produced from no longer matches disk, or
+  // the ruleset it ran has changed since. `None` when the data it
+  // referenced can no longer be found at all.
   optional bool stale = 6;
   // The agent that ran it, or `None` for a person. `default` for a view
   // built before agents could run research.
@@ -197,6 +198,14 @@ message HistoryEntryView {
   optional uint32 trials = 9;
   // How many files are kept with it (#157).
   uint32 attachments = 10;
+  // What produced it (#189): the engine build, and for a ruleset the
+  // document's hash at run time. Two findings from different versions of
+  // one ruleset are told apart by this.
+  string code_commit = 11;
+  string ruleset_hash = 12;
+  // Why `stale` is set: `data`, `ruleset`, or `data and ruleset`. Empty
+  // when fresh, and when the data is gone altogether.
+  string stale_reason = 13;
 }
 
 // What the workbench shows before anything has been run.

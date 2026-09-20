@@ -44,6 +44,21 @@ pub struct FindingSummary {
     /// The agent or script that ran it; empty for a person.
     #[prost(string, tag = "6")]
     pub author: ::prost::alloc::string::String,
+    /// Which rule or ruleset ran, by the name the picker shows. A ruleset is
+    /// the file `rulesets/<name>.json` in the project.
+    #[prost(string, tag = "7")]
+    pub strategy: ::prost::alloc::string::String,
+    /// The engine build that produced it (#189): the git commit, with `-dirty`
+    /// when the tree had uncommitted changes, or `unknown` for a build made
+    /// outside a checkout.
+    #[prost(string, tag = "8")]
+    pub code_commit: ::prost::alloc::string::String,
+    /// The ruleset document's content hash at run time, when the strategy was
+    /// a ruleset rather than a shipped rule; empty otherwise. A finding whose
+    /// hash no longer matches the file is stale: the rule it measured is not
+    /// the rule the file now holds.
+    #[prost(string, tag = "9")]
+    pub ruleset_hash: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -703,8 +718,9 @@ pub struct HistoryEntryView {
     pub verdict: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub recorded_at: ::prost::alloc::string::String,
-    /// True when the data this was produced from no longer matches disk.
-    /// `None` when the data it referenced can no longer be found at all.
+    /// True when the data this was produced from no longer matches disk, or
+    /// the ruleset it ran has changed since. `None` when the data it
+    /// referenced can no longer be found at all.
     #[prost(bool, optional, tag = "6")]
     pub stale: ::core::option::Option<bool>,
     /// The agent that ran it, or `None` for a person. `default` for a view
@@ -720,6 +736,17 @@ pub struct HistoryEntryView {
     /// How many files are kept with it (#157).
     #[prost(uint32, tag = "10")]
     pub attachments: u32,
+    /// What produced it (#189): the engine build, and for a ruleset the
+    /// document's hash at run time. Two findings from different versions of
+    /// one ruleset are told apart by this.
+    #[prost(string, tag = "11")]
+    pub code_commit: ::prost::alloc::string::String,
+    #[prost(string, tag = "12")]
+    pub ruleset_hash: ::prost::alloc::string::String,
+    /// Why `stale` is set: `data`, `ruleset`, or `data and ruleset`. Empty
+    /// when fresh, and when the data is gone altogether.
+    #[prost(string, tag = "13")]
+    pub stale_reason: ::prost::alloc::string::String,
 }
 /// What the workbench shows before anything has been run.
 /// Everything in research memory, and what could not be read of it.
