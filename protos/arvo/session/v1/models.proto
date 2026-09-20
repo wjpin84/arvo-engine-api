@@ -16,6 +16,15 @@ message SessionId {
   string id = 1;
 }
 
+// The kill switch (#127): arm the gate, then flatten everything the session
+// holds. The halt is in force either way; what the venue would not exit is
+// named in the session record.
+message HaltRequest {
+  string id = 1;
+  // Why, for the record. Empty means "a person pressed it".
+  string reason = 2;
+}
+
 message SessionStatus {
   string id = 1;
   string finding = 2;

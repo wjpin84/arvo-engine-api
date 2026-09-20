@@ -55,6 +55,11 @@ class SessionsStub(object):
                 request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
                 response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
                 _registered_method=True)
+        self.HaltSession = channel.unary_unary(
+                '/arvo.services.v1.Sessions/HaltSession',
+                request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.HaltRequest.SerializeToString,
+                response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+                _registered_method=True)
         self.ListSessions = channel.unary_unary(
                 '/arvo.services.v1.Sessions/ListSessions',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -101,6 +106,15 @@ class SessionsServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def HaltSession(self, request, context):
+        """The kill switch: stops the session taking entries and flattens what it
+        holds. Exits that the venue refuses are named in the session record; the
+        halt stands either way. Not lifted from here.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ListSessions(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -137,6 +151,11 @@ def add_SessionsServicer_to_server(servicer, server):
             'ResumeSession': grpc.unary_unary_rpc_method_handler(
                     servicer.ResumeSession,
                     request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.FromString,
+                    response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.SerializeToString,
+            ),
+            'HaltSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.HaltSession,
+                    request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.HaltRequest.FromString,
                     response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.SerializeToString,
             ),
             'ListSessions': grpc.unary_unary_rpc_method_handler(
@@ -257,6 +276,33 @@ class Sessions(object):
             target,
             '/arvo.services.v1.Sessions/ResumeSession',
             arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
+            arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def HaltSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Sessions/HaltSession',
+            arvo_dot_session_dot_v1_dot_models__pb2.HaltRequest.SerializeToString,
             arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
             options,
             channel_credentials,

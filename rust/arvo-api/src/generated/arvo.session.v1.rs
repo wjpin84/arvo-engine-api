@@ -16,6 +16,18 @@ pub struct SessionId {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
 }
+/// The kill switch (#127): arm the gate, then flatten everything the session
+/// holds. The halt is in force either way; what the venue would not exit is
+/// named in the session record.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct HaltRequest {
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    /// Why, for the record. Empty means "a person pressed it".
+    #[prost(string, tag = "2")]
+    pub reason: ::prost::alloc::string::String,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SessionStatus {

@@ -36,6 +36,9 @@ shipped to a registry yet, so nothing here is a break of anything.
   gain `rule`, `signal`, `regime` and `asked`: what the rule saw when it
   opened the trade and what it asked the gate for. All optional; a trade
   recorded before the journal carries none.
+- **Kill switch (#127).** `Sessions.HaltSession(HaltRequest{id, reason})`
+  arms the gate and flattens what the session holds; the status comes back
+  `halted`.
 
 ## 0.1.0
 

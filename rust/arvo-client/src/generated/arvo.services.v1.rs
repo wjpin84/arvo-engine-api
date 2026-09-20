@@ -6227,6 +6227,33 @@ pub mod sessions_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Sessions", "ResumeSession"));
             self.inner.unary(req, path, codec).await
         }
+        /// The kill switch: stops the session taking entries and flattens what it
+        /// holds. Exits that the venue refuses are named in the session record; the
+        /// halt stands either way. Not lifted from here.
+        pub async fn halt_session(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::session::HaltRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Sessions/HaltSession",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Sessions", "HaltSession"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn list_sessions(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -6324,6 +6351,16 @@ pub mod sessions_server {
         async fn resume_session(
             &self,
             request: tonic::Request<::arvo_api::session::SessionId>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        >;
+        /// The kill switch: stops the session taking entries and flattens what it
+        /// holds. Exits that the venue refuses are named in the session record; the
+        /// halt stands either way. Not lifted from here.
+        async fn halt_session(
+            &self,
+            request: tonic::Request<::arvo_api::session::HaltRequest>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::session::SessionStatus>,
             tonic::Status,
@@ -6587,6 +6624,51 @@ pub mod sessions_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ResumeSessionSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Sessions/HaltSession" => {
+                    #[allow(non_camel_case_types)]
+                    struct HaltSessionSvc<T: Sessions>(pub Arc<T>);
+                    impl<
+                        T: Sessions,
+                    > tonic::server::UnaryService<::arvo_api::session::HaltRequest>
+                    for HaltSessionSvc<T> {
+                        type Response = ::arvo_api::session::SessionStatus;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::session::HaltRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Sessions>::halt_session(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = HaltSessionSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

@@ -17,6 +17,10 @@ service Sessions {
   // reconcile: resuming against a book the venue disagrees with is the state
   // the freeze exists to prevent.
   rpc ResumeSession(arvo.session.v1.SessionId) returns (arvo.session.v1.SessionStatus);
+  // The kill switch: stops the session taking entries and flattens what it
+  // holds. Exits that the venue refuses are named in the session record; the
+  // halt stands either way. Not lifted from here.
+  rpc HaltSession(arvo.session.v1.HaltRequest) returns (arvo.session.v1.SessionStatus);
   rpc ListSessions(arvo.common.v1.Empty) returns (arvo.session.v1.SessionList);
   // Stop serving and exit. The front end that started this engine asks before
   // it kills: a killed process runs no destructors, so the providers it
