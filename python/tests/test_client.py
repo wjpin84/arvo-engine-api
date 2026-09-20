@@ -194,11 +194,14 @@ def test_a_finding_carries_its_ruleset_hash_and_goes_stale_when_the_ruleset_chan
         day += datetime.timedelta(days=1)
     (tmp_path / "data" / "LONG.SIM.csv").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
-    # A ruleset over a shipped rule, fixing every parameter to one value.
+    # A ruleset over a shipped rule: every axis fixed but the first, which
+    # keeps two values, because a ruleset that searches nothing is refused.
     rules = engine._call(engine._stub.ListRules, common.Empty()).rules
     rule = next(r for r in rules if r.name == "sma_cross")
+    searched, *fixed_axes = rule.axes
     params = [research.Param(name=f.name, values=[f.value]) for f in rule.fixed]
-    params += [research.Param(name=a.name, values=[a.values[0]]) for a in rule.axes]
+    params += [research.Param(name=a.name, values=[a.values[0]]) for a in fixed_axes]
+    params.append(research.Param(name=searched.name, values=list(searched.values[:2])))
     form = research.RulesetForm(name="my_cross", rule="sma_cross", label="Mine", premise="", params=params)
     engine._call(engine._stub.WriteRuleset, form)
 
@@ -207,9 +210,9 @@ def test_a_finding_carries_its_ruleset_hash_and_goes_stale_when_the_ruleset_chan
     assert first.ruleset_hash, "a ruleset run records the document's hash"
     assert first.code_commit, "every run records the build"
 
-    # The same ruleset, edited: one axis moved to its other end.
-    axis = next(p for p in form.params if p.name == rule.axes[0].name)
-    axis.values[:] = [rule.axes[0].values[-1]]
+    # The same ruleset, edited: the searched axis reaches further.
+    axis = next(p for p in form.params if p.name == searched.name)
+    axis.values[:] = [searched.values[0], searched.values[1] * 2]
     engine._call(engine._stub.WriteRuleset, form)
     second = engine.run_study("LONG.SIM", "my_cross", author="script:test")
     assert second.ruleset_hash != first.ruleset_hash, "a different rule, whatever it is called"
