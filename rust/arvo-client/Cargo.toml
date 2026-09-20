@@ -1,0 +1,30 @@
+[package]
+name = "arvo-client"
+description = "Talk to Arvo's engine over gRPC: the generated service stubs, where to find a running engine, and the token each service takes."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/arvo-client"
+readme = "README.md"
+keywords = ["arvo", "trading", "research", "grpc", "client"]
+categories = ["api-bindings", "finance"]
+include = ["src/**", "README.md"]
+
+[dependencies]
+# Same version, always: the stubs here name the types there.
+arvo-api = { version = "=0.1.0", path = "../arvo-api" }
+prost.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[package.metadata.docs.rs]
+all-features = true

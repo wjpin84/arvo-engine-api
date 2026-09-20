@@ -1,0 +1,37 @@
+[project]
+# `arvo` on PyPI belongs to someone else; the module is still `arvo`.
+name = "arvo-client"
+version = "0.1.0"
+description = "Arvo's engine from Python: a research client that reads findings and runs studies, and the generated stubs for every service."
+readme = "README.md"
+license = "Apache-2.0"
+keywords = ["arvo", "trading", "research", "grpc"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
+]
+requires-python = ">=3.10"
+dependencies = [
+    # The stubs under src/arvo/*/v1 were generated with grpcio-tools 1.75.1,
+    # which require at least these runtimes.
+    "grpcio>=1.75.1",
+    "protobuf>=6.31.1",
+    "pandas>=2",
+]
+
+[project.urls]
+Homepage = "https://github.com/wjpin84/arvo-engine-api"
+Documentation = "https://github.com/wjpin84/arvo-engine-api/blob/main/python/README.md"
+Changelog = "https://github.com/wjpin84/arvo-engine-api/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = ["pytest>=8", "grpcio-tools==1.75.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arvo"]

@@ -1,0 +1,12 @@
+# Rust
+rust/target/
+
+# Python
+python/.venv/
+python/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# A file Windows makes when a command is redirected to NUL from the wrong shell.
+nul

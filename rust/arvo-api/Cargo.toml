@@ -1,0 +1,22 @@
+[package]
+name = "arvo-api"
+description = "The types of Arvo's engine API, generated from its protobuf contract. Messages only, no transport, so it builds for WebAssembly."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/arvo-api"
+readme = "README.md"
+keywords = ["arvo", "trading", "research", "protobuf", "api"]
+categories = ["api-bindings", "finance"]
+# The generated code is committed, so the package is self-contained: no
+# protos, no protoc, no build script.
+include = ["src/**", "README.md"]
+
+[dependencies]
+prost.workspace = true
+serde.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

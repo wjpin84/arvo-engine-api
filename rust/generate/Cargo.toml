@@ -1,0 +1,15 @@
+[package]
+name = "generate"
+description = "Regenerates the Rust bindings from the protos. Not published; run with `cargo run -p generate`."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+# protoc is vendored rather than required on the machine, so regenerating is
+# one command on any checkout and the same protoc on every one.
+protoc-bin-vendored = "3.2.0"
+prost-build = "0.14"
+tonic-prost-build = "0.14.6"

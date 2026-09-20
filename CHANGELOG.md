@@ -1,0 +1,29 @@
+# Changelog
+
+One entry per release, covering the protos and every binding of them. The
+bump named on each release follows [VERSIONING.md](VERSIONING.md).
+
+## Unreleased
+
+The first version of the contract as a published thing. Nothing below has
+shipped to a registry yet, so nothing here is a break of anything.
+
+- **Protos.** One package per domain, each holding `models.proto` and
+  `views.proto`; the services apart from them under `arvo.services.v1`, one
+  file per domain, each behind either the research token or the control
+  token. Every call names the message it answers with; there is no untyped
+  envelope. Lists cross as messages (`SourcesView`, `JobsView`, ...) so a
+  total or a cursor can join them later without renumbering.
+- **Services.** `Research` (research token), and behind the control token
+  `ResearchFiles`, `Market`, `Accounts`, `Portfolio`, `Platform`,
+  `Sessions` and `Scripts`. Scripts and the cadences a person sets for them
+  are the engine's, so a schedule runs with no window open.
+- **Rust.** `arvo-api` (messages, serde, no transport, builds for
+  WebAssembly) and `arvo-client` (stubs, discovery, tokens). Generated code
+  is committed; consumers need no protoc.
+- **Python.** The `arvo` package as `arvo-client`: a research client and
+  the generated stubs for every service.
+
+## 0.1.0
+
+Not yet.

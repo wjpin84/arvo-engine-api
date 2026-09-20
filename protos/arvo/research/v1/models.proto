@@ -248,7 +248,7 @@ message Fixed {
   double value = 2;
 }
 
-// One file under <project>/rulesets/, as the picker sees it.
+// One file under `<project>`/rulesets/, as the picker sees it.
 message Ruleset {
   string path = 1;
   string name = 2;
