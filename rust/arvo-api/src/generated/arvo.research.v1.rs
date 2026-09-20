@@ -247,6 +247,17 @@ pub struct LedgerTrade {
     /// "signal", "stop", "halted", "expired" or "still_open"; empty means signal.
     #[prost(string, tag = "10")]
     pub exit_reason: ::prost::alloc::string::String,
+    /// What the rule saw at entry (#190): the condition that fired, the value it
+    /// was judged on, the regime it saw, and the quantity it asked the gate for.
+    /// Absent on a trade recorded before the journal or opened by no rule.
+    #[prost(string, optional, tag = "11")]
+    pub rule: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "12")]
+    pub signal: ::core::option::Option<f64>,
+    #[prost(string, optional, tag = "13")]
+    pub regime: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "14")]
+    pub asked: ::core::option::Option<f64>,
 }
 /// Evidence an engine Arvo did not run computed (ADR-0026). What a run
 /// produces, before anyone concludes anything from it; Arvo computes the
@@ -369,6 +380,17 @@ pub struct TradeRow {
     pub held_days: ::core::option::Option<f64>,
     #[prost(string, tag = "11")]
     pub exit_reason: ::prost::alloc::string::String,
+    /// What the rule saw at entry (#190): the condition that fired, the value it
+    /// was judged on, the regime it saw, and the quantity it asked the gate for.
+    /// Absent on a trade recorded before the journal or opened by no rule.
+    #[prost(string, optional, tag = "12")]
+    pub rule: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "13")]
+    pub signal: ::core::option::Option<f64>,
+    #[prost(string, optional, tag = "14")]
+    pub regime: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "15")]
+    pub asked: ::core::option::Option<f64>,
 }
 /// A ruleset parameter: one value fixes it, several search it.
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -1315,6 +1337,17 @@ pub struct TradeRowView {
     /// `signal`, `stop`, or `open`.
     #[prost(string, tag = "11")]
     pub exit_reason: ::prost::alloc::string::String,
+    /// What the rule saw at entry (#190): the condition that fired, the value it
+    /// was judged on, the regime it saw, and the quantity it asked the gate for.
+    /// Absent on a trade recorded before the journal or opened by no rule.
+    #[prost(string, optional, tag = "12")]
+    pub rule: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "13")]
+    pub signal: ::core::option::Option<f64>,
+    #[prost(string, optional, tag = "14")]
+    pub regime: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag = "15")]
+    pub asked: ::core::option::Option<f64>,
 }
 /// What the round trips looked like, flattened for display.
 ///

@@ -298,7 +298,9 @@ class Engine:
         ``closed`` (omit while open), ``direction`` (``long``/``short``),
         ``quantity``, ``entry``, ``exit``, ``pnl``, ``commission`` and
         ``exit_reason`` (``signal``, ``stop``, ``halted``, ``expired``,
-        ``still_open``). ``dataset`` is ``(id, version)``, the version being
+        ``still_open``), and optionally what the rule saw when it entered:
+        ``rule`` (the condition, in words), ``signal`` (the value it was
+        judged on), ``regime`` and ``asked`` (the quantity before the gate). ``dataset`` is ``(id, version)``, the version being
         a content hash of what the engine read. Without a benchmark the
         finding is Inconclusive: a return with nothing to beat is not a
         result.
@@ -315,6 +317,10 @@ class Engine:
                 commission=float(row.get("commission", 0.0)),
                 exit_reason=str(row.get("exit_reason", "signal")),
                 **({"exit": float(row["exit"])} if row.get("exit") is not None else {}),
+                **({"rule": str(row["rule"])} if row.get("rule") is not None else {}),
+                **({"signal": float(row["signal"])} if row.get("signal") is not None else {}),
+                **({"regime": str(row["regime"])} if row.get("regime") is not None else {}),
+                **({"asked": float(row["asked"])} if row.get("asked") is not None else {}),
             )
             for row in ledger
         ]

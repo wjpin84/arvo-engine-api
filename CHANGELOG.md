@@ -32,6 +32,10 @@ shipped to a registry yet, so nothing here is a break of anything.
   `frozen` naming the disagreement and `reconciled` saying whether it has
   been squared. `Sessions` gains `ReconcileSession` and `ResumeSession`,
   both by `SessionId`; a resume before a reconcile is refused.
+- **Trade journal (#190).** `LedgerTrade`, `TradeRow` and `TradeRowView`
+  gain `rule`, `signal`, `regime` and `asked`: what the rule saw when it
+  opened the trade and what it asked the gate for. All optional; a trade
+  recorded before the journal carries none.
 
 ## 0.1.0
 

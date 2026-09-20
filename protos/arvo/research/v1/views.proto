@@ -587,6 +587,13 @@ message TradeRowView {
   optional double held_days = 10;
   // `signal`, `stop`, or `open`.
   string exit_reason = 11;
+  // What the rule saw at entry (#190): the condition that fired, the value it
+  // was judged on, the regime it saw, and the quantity it asked the gate for.
+  // Absent on a trade recorded before the journal or opened by no rule.
+  optional string rule = 12;
+  optional double signal = 13;
+  optional string regime = 14;
+  optional double asked = 15;
 }
 
 // What the round trips looked like, flattened for display.

@@ -167,6 +167,13 @@ message LedgerTrade {
   double commission = 9;
   // "signal", "stop", "halted", "expired" or "still_open"; empty means signal.
   string exit_reason = 10;
+  // What the rule saw at entry (#190): the condition that fired, the value it
+  // was judged on, the regime it saw, and the quantity it asked the gate for.
+  // Absent on a trade recorded before the journal or opened by no rule.
+  optional string rule = 11;
+  optional double signal = 12;
+  optional string regime = 13;
+  optional double asked = 14;
 }
 
 // Evidence an engine Arvo did not run computed (ADR-0026). What a run
@@ -247,6 +254,13 @@ message TradeRow {
   double commission = 9;
   optional double held_days = 10;
   string exit_reason = 11;
+  // What the rule saw at entry (#190): the condition that fired, the value it
+  // was judged on, the regime it saw, and the quantity it asked the gate for.
+  // Absent on a trade recorded before the journal or opened by no rule.
+  optional string rule = 12;
+  optional double signal = 13;
+  optional string regime = 14;
+  optional double asked = 15;
 }
 
 // A ruleset parameter: one value fixes it, several search it.
