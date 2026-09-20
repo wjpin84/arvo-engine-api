@@ -170,3 +170,52 @@ def _address(root: Path) -> str:
     import json
 
     return json.loads((root / "engine.json").read_text(encoding="utf-8"))["address"]
+
+
+def test_a_finding_carries_its_ruleset_hash_and_goes_stale_when_the_ruleset_changes(
+    engine: arvo.Engine, tmp_path: Path
+) -> None:
+    """#189: two findings from different versions of one ruleset are told apart,
+    and the earlier one is marked stale for the ruleset, not the data."""
+    import datetime
+    import random
+
+    from arvo.common.v1 import models_pb2 as common
+    from arvo.research.v1 import models_pb2 as research
+
+    # A series long enough for a moving-average rule to run on.
+    random.seed(1)
+    rows = ["date,open,high,low,close,volume"]
+    price, day = 100.0, datetime.date(2022, 1, 3)
+    while len(rows) < 600:
+        if day.weekday() < 5:
+            price *= 1 + random.gauss(0.0003, 0.01)
+            rows.append(f"{day.isoformat()},{price:.2f},{price * 1.01:.2f},{price * 0.99:.2f},{price:.2f},1000")
+        day += datetime.timedelta(days=1)
+    (tmp_path / "data" / "LONG.SIM.csv").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    # A ruleset over a shipped rule, fixing every parameter to one value.
+    rules = engine._call(engine._stub.ListRules, common.Empty()).rules
+    rule = next(r for r in rules if r.name == "sma_cross")
+    params = [research.Param(name=f.name, values=[f.value]) for f in rule.fixed]
+    params += [research.Param(name=a.name, values=[a.values[0]]) for a in rule.axes]
+    form = research.RulesetForm(name="my_cross", rule="sma_cross", label="Mine", premise="", params=params)
+    engine._call(engine._stub.WriteRuleset, form)
+
+    first = engine.run_study("LONG.SIM", "my_cross", author="script:test")
+    assert first.strategy == "my_cross"
+    assert first.ruleset_hash, "a ruleset run records the document's hash"
+    assert first.code_commit, "every run records the build"
+
+    # The same ruleset, edited: one axis moved to its other end.
+    axis = next(p for p in form.params if p.name == rule.axes[0].name)
+    axis.values[:] = [rule.axes[0].values[-1]]
+    engine._call(engine._stub.WriteRuleset, form)
+    second = engine.run_study("LONG.SIM", "my_cross", author="script:test")
+    assert second.ruleset_hash != first.ruleset_hash, "a different rule, whatever it is called"
+
+    entries = {e.id: e for e in engine._call(engine._stub.ViewHistory, common.Empty()).entries}
+    assert entries[first.id].stale is True
+    assert entries[first.id].stale_reason == "ruleset", "the data did not change; the rule did"
+    assert entries[second.id].stale is False
+    assert entries[second.id].ruleset_hash == second.ruleset_hash
