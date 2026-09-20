@@ -11,6 +11,12 @@ service Sessions {
   rpc StartSession(arvo.session.v1.StartRequest) returns (arvo.session.v1.SessionStatus);
   // Stops after the current poll. Positions are left as they are.
   rpc StopSession(arvo.session.v1.SessionId) returns (arvo.session.v1.SessionStatus);
+  // Makes a frozen session's book agree with the venue's. It stays frozen.
+  rpc ReconcileSession(arvo.session.v1.SessionId) returns (arvo.session.v1.SessionStatus);
+  // Lets a frozen, reconciled session take entries again. Refused before a
+  // reconcile: resuming against a book the venue disagrees with is the state
+  // the freeze exists to prevent.
+  rpc ResumeSession(arvo.session.v1.SessionId) returns (arvo.session.v1.SessionStatus);
   rpc ListSessions(arvo.common.v1.Empty) returns (arvo.session.v1.SessionList);
   // Stop serving and exit. The front end that started this engine asks before
   // it kills: a killed process runs no destructors, so the providers it

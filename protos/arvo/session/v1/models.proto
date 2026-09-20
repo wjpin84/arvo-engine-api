@@ -23,7 +23,7 @@ message SessionStatus {
   string instrument = 4;
   string strategy = 5;
   string started_at = 6;
-  // starting, running, halted, stopped or failed.
+  // starting, running, frozen, halted, stopped or failed.
   string state = 7;
   uint32 signals = 8;
   uint32 submitted = 9;
@@ -33,6 +33,10 @@ message SessionStatus {
   optional string halted = 12;
   optional string last_error = 13;
   optional string last_bar = 14;
+  // What the gate and the venue disagreed about, while frozen (#187).
+  optional string frozen = 15;
+  // Whether a frozen session has been reconciled, so ResumeSession is allowed.
+  bool reconciled = 16;
 }
 
 message SessionList {

@@ -27,6 +27,11 @@ shipped to a registry yet, so nothing here is a break of anything.
   since is stale, like one whose data has.
 - **Python.** The `arvo` package as `arvo-client`: a research client and
   the generated stubs for every service.
+- **Reconciliation as an incident (#187).** A session whose book disagrees
+  with the venue's freezes: `SessionStatus.state` gains `frozen`, with
+  `frozen` naming the disagreement and `reconciled` saying whether it has
+  been squared. `Sessions` gains `ReconcileSession` and `ResumeSession`,
+  both by `SessionId`; a resume before a reconcile is refused.
 
 ## 0.1.0
 

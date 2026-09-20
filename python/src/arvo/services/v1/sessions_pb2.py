@@ -26,7 +26,7 @@ from arvo.common.v1 import models_pb2 as arvo_dot_common_dot_v1_dot_models__pb2
 from arvo.session.v1 import models_pb2 as arvo_dot_session_dot_v1_dot_models__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x61rvo/services/v1/sessions.proto\x12\x10\x61rvo.services.v1\x1a\x1b\x61rvo/common/v1/models.proto\x1a\x1c\x61rvo/session/v1/models.proto2\xa3\x02\n\x08Sessions\x12M\n\x0cStartSession\x12\x1d.arvo.session.v1.StartRequest\x1a\x1e.arvo.session.v1.SessionStatus\x12I\n\x0bStopSession\x12\x1a.arvo.session.v1.SessionId\x1a\x1e.arvo.session.v1.SessionStatus\x12\x43\n\x0cListSessions\x12\x15.arvo.common.v1.Empty\x1a\x1c.arvo.session.v1.SessionList\x12\x38\n\x08Shutdown\x12\x15.arvo.common.v1.Empty\x1a\x15.arvo.common.v1.Emptyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x61rvo/services/v1/sessions.proto\x12\x10\x61rvo.services.v1\x1a\x1b\x61rvo/common/v1/models.proto\x1a\x1c\x61rvo/session/v1/models.proto2\xc0\x03\n\x08Sessions\x12M\n\x0cStartSession\x12\x1d.arvo.session.v1.StartRequest\x1a\x1e.arvo.session.v1.SessionStatus\x12I\n\x0bStopSession\x12\x1a.arvo.session.v1.SessionId\x1a\x1e.arvo.session.v1.SessionStatus\x12N\n\x10ReconcileSession\x12\x1a.arvo.session.v1.SessionId\x1a\x1e.arvo.session.v1.SessionStatus\x12K\n\rResumeSession\x12\x1a.arvo.session.v1.SessionId\x1a\x1e.arvo.session.v1.SessionStatus\x12\x43\n\x0cListSessions\x12\x15.arvo.common.v1.Empty\x1a\x1c.arvo.session.v1.SessionList\x12\x38\n\x08Shutdown\x12\x15.arvo.common.v1.Empty\x1a\x15.arvo.common.v1.Emptyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,5 +34,5 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'arvo.services.v1.sessions_p
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_SESSIONS']._serialized_start=113
-  _globals['_SESSIONS']._serialized_end=404
+  _globals['_SESSIONS']._serialized_end=561
 # @@protoc_insertion_point(module_scope)

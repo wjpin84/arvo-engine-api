@@ -31,7 +31,7 @@ pub struct SessionStatus {
     pub strategy: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub started_at: ::prost::alloc::string::String,
-    /// starting, running, halted, stopped or failed.
+    /// starting, running, frozen, halted, stopped or failed.
     #[prost(string, tag = "7")]
     pub state: ::prost::alloc::string::String,
     #[prost(uint32, tag = "8")]
@@ -49,6 +49,12 @@ pub struct SessionStatus {
     pub last_error: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "14")]
     pub last_bar: ::core::option::Option<::prost::alloc::string::String>,
+    /// What the gate and the venue disagreed about, while frozen (#187).
+    #[prost(string, optional, tag = "15")]
+    pub frozen: ::core::option::Option<::prost::alloc::string::String>,
+    /// Whether a frozen session has been reconciled, so ResumeSession is allowed.
+    #[prost(bool, tag = "16")]
+    pub reconciled: bool,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]

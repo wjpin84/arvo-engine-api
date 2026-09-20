@@ -6173,6 +6173,60 @@ pub mod sessions_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Sessions", "StopSession"));
             self.inner.unary(req, path, codec).await
         }
+        /// Makes a frozen session's book agree with the venue's. It stays frozen.
+        pub async fn reconcile_session(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::session::SessionId>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Sessions/ReconcileSession",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("arvo.services.v1.Sessions", "ReconcileSession"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Lets a frozen, reconciled session take entries again. Refused before a
+        /// reconcile: resuming against a book the venue disagrees with is the state
+        /// the freeze exists to prevent.
+        pub async fn resume_session(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::session::SessionId>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Sessions/ResumeSession",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Sessions", "ResumeSession"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn list_sessions(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -6250,6 +6304,24 @@ pub mod sessions_server {
         >;
         /// Stops after the current poll. Positions are left as they are.
         async fn stop_session(
+            &self,
+            request: tonic::Request<::arvo_api::session::SessionId>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        >;
+        /// Makes a frozen session's book agree with the venue's. It stays frozen.
+        async fn reconcile_session(
+            &self,
+            request: tonic::Request<::arvo_api::session::SessionId>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::SessionStatus>,
+            tonic::Status,
+        >;
+        /// Lets a frozen, reconciled session take entries again. Refused before a
+        /// reconcile: resuming against a book the venue disagrees with is the state
+        /// the freeze exists to prevent.
+        async fn resume_session(
             &self,
             request: tonic::Request<::arvo_api::session::SessionId>,
         ) -> std::result::Result<
@@ -6425,6 +6497,96 @@ pub mod sessions_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = StopSessionSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Sessions/ReconcileSession" => {
+                    #[allow(non_camel_case_types)]
+                    struct ReconcileSessionSvc<T: Sessions>(pub Arc<T>);
+                    impl<
+                        T: Sessions,
+                    > tonic::server::UnaryService<::arvo_api::session::SessionId>
+                    for ReconcileSessionSvc<T> {
+                        type Response = ::arvo_api::session::SessionStatus;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::session::SessionId>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Sessions>::reconcile_session(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ReconcileSessionSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Sessions/ResumeSession" => {
+                    #[allow(non_camel_case_types)]
+                    struct ResumeSessionSvc<T: Sessions>(pub Arc<T>);
+                    impl<
+                        T: Sessions,
+                    > tonic::server::UnaryService<::arvo_api::session::SessionId>
+                    for ResumeSessionSvc<T> {
+                        type Response = ::arvo_api::session::SessionStatus;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::session::SessionId>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Sessions>::resume_session(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ResumeSessionSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

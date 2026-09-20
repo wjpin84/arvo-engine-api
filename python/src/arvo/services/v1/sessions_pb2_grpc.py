@@ -45,6 +45,16 @@ class SessionsStub(object):
                 request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
                 response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
                 _registered_method=True)
+        self.ReconcileSession = channel.unary_unary(
+                '/arvo.services.v1.Sessions/ReconcileSession',
+                request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
+                response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+                _registered_method=True)
+        self.ResumeSession = channel.unary_unary(
+                '/arvo.services.v1.Sessions/ResumeSession',
+                request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
+                response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+                _registered_method=True)
         self.ListSessions = channel.unary_unary(
                 '/arvo.services.v1.Sessions/ListSessions',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -75,6 +85,22 @@ class SessionsServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ReconcileSession(self, request, context):
+        """Makes a frozen session's book agree with the venue's. It stays frozen.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ResumeSession(self, request, context):
+        """Lets a frozen, reconciled session take entries again. Refused before a
+        reconcile: resuming against a book the venue disagrees with is the state
+        the freeze exists to prevent.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ListSessions(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -100,6 +126,16 @@ def add_SessionsServicer_to_server(servicer, server):
             ),
             'StopSession': grpc.unary_unary_rpc_method_handler(
                     servicer.StopSession,
+                    request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.FromString,
+                    response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.SerializeToString,
+            ),
+            'ReconcileSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReconcileSession,
+                    request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.FromString,
+                    response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.SerializeToString,
+            ),
+            'ResumeSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResumeSession,
                     request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionId.FromString,
                     response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.SerializeToString,
             ),
@@ -166,6 +202,60 @@ class Sessions(object):
             request,
             target,
             '/arvo.services.v1.Sessions/StopSession',
+            arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
+            arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReconcileSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Sessions/ReconcileSession',
+            arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
+            arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResumeSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Sessions/ResumeSession',
             arvo_dot_session_dot_v1_dot_models__pb2.SessionId.SerializeToString,
             arvo_dot_session_dot_v1_dot_models__pb2.SessionStatus.FromString,
             options,
