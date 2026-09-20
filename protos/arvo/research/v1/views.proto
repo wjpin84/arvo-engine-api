@@ -689,3 +689,24 @@ message InstrumentChartView {
   repeated CandlePoint price = 2;
   repeated TradeMarkerView markers = 3;
 }
+
+// A finding's caveat, against the script line that produced the finding:
+// what the Problems panel lists with source "Arvo" (ADR-0021).
+message ResearchProblemView {
+  // Relative to the project folder.
+  string path = 1;
+  uint32 line = 2;
+  // `error`, `warning` or `info`.
+  string severity = 3;
+  string message = 4;
+  // The finding it comes from, to open.
+  string finding = 5;
+}
+
+// The Problems panel's rows.
+//
+// A list, as a message: an RPC returns one message, never a bare repeated
+// field, so a call that answers with a list needs a name for the list.
+message ProblemsView {
+  repeated ResearchProblemView problems = 1;
+}

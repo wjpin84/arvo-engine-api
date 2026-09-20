@@ -4,6 +4,7 @@ package arvo.services.v1;
 
 import "arvo/common/v1/models.proto";
 import "arvo/market/v1/models.proto";
+import "arvo/market/v1/views.proto";
 
 // The data library, the sources that fill it, and prices.
 //
@@ -11,14 +12,14 @@ import "arvo/market/v1/models.proto";
 // library and makes existing findings stale, which is a person's decision
 // (ADR-0016); an agent holding engine.json cannot reach any of this.
 service Market {
-  rpc ViewLibrary(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc ListSources(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc SearchInstruments(arvo.market.v1.InstrumentSearch) returns (arvo.common.v1.View);
-  rpc FetchBars(arvo.market.v1.FetchRequest) returns (arvo.common.v1.View);
-  rpc CompareSources(arvo.market.v1.CompareRequest) returns (arvo.common.v1.View);
+  rpc ViewLibrary(arvo.common.v1.Empty) returns (arvo.market.v1.DataLibraryView);
+  rpc ListSources(arvo.common.v1.Empty) returns (arvo.market.v1.SourcesView);
+  rpc SearchInstruments(arvo.market.v1.InstrumentSearch) returns (arvo.market.v1.MatchesView);
+  rpc FetchBars(arvo.market.v1.FetchRequest) returns (arvo.market.v1.FetchView);
+  rpc CompareSources(arvo.market.v1.CompareRequest) returns (arvo.market.v1.SourceComparisonView);
   // The watchlist, and the prices that move under it. `Watchlist` also tells
   // the engine which symbols to keep the socket subscribed to, so asking for
   // the rows is what starts the ticks.
-  rpc Watchlist(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc Watchlist(arvo.common.v1.Empty) returns (arvo.market.v1.WatchlistView);
   rpc StreamQuotes(arvo.common.v1.Empty) returns (stream arvo.market.v1.QuoteTick);
 }

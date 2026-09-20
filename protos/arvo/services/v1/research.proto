@@ -5,6 +5,8 @@ package arvo.services.v1;
 import "arvo/common/v1/models.proto";
 import "arvo/market/v1/models.proto";
 import "arvo/research/v1/models.proto";
+import "arvo/platform/v1/views.proto";
+import "arvo/research/v1/views.proto";
 
 service Research {
   rpc ListStrategies(arvo.common.v1.Empty) returns (arvo.research.v1.Strategies);
@@ -32,19 +34,19 @@ service Research {
   rpc GetRiskModel(arvo.common.v1.Empty) returns (arvo.research.v1.RiskModel);
   // The workbench's own views (#127 stage 2): what the window renders, from
   // the same runs an agent's RunStudy performs.
-  rpc ViewStudy(arvo.research.v1.StudyRequest) returns (arvo.common.v1.View);
-  rpc ViewWalkForward(arvo.research.v1.StudyRequest) returns (arvo.common.v1.View);
-  rpc ViewPanel(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc ViewBook(arvo.research.v1.BookRequest) returns (arvo.common.v1.View);
-  rpc ViewHistory(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc ViewRecord(arvo.research.v1.FindingId) returns (arvo.common.v1.View);
-  rpc ViewReplay(arvo.research.v1.FindingId) returns (arvo.common.v1.View);
-  rpc ViewComparison(arvo.research.v1.FindingIds) returns (arvo.common.v1.View);
-  rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.common.v1.View);
+  rpc ViewStudy(arvo.research.v1.StudyRequest) returns (arvo.research.v1.StudyView);
+  rpc ViewWalkForward(arvo.research.v1.StudyRequest) returns (arvo.research.v1.WalkForwardView);
+  rpc ViewPanel(arvo.common.v1.Empty) returns (arvo.research.v1.PanelView);
+  rpc ViewBook(arvo.research.v1.BookRequest) returns (arvo.research.v1.StudyView);
+  rpc ViewHistory(arvo.common.v1.Empty) returns (arvo.research.v1.HistoryView);
+  rpc ViewRecord(arvo.research.v1.FindingId) returns (arvo.research.v1.RecordView);
+  rpc ViewReplay(arvo.research.v1.FindingId) returns (arvo.research.v1.ReplayView);
+  rpc ViewComparison(arvo.research.v1.FindingIds) returns (arvo.research.v1.ComparisonView);
+  rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.research.v1.ProblemsView);
   rpc ListAttachments(arvo.research.v1.FindingId) returns (arvo.research.v1.Attachments);
   // What happened, as it happens: every event the engine raises, as a View
   // of kind EventView (#150). A session changing state is the first.
-  rpc Subscribe(arvo.common.v1.Empty) returns (stream arvo.common.v1.View);
+  rpc Subscribe(arvo.common.v1.Empty) returns (stream arvo.platform.v1.EventView);
 }
 
 // The research files a person asks for: an experiment someone sent, and
@@ -58,7 +60,7 @@ service ResearchFiles {
   // Running an imported experiment, and the files a finding turns into. Each
   // export answers with a path the caller reveals; the engine writes, the
   // front end shows.
-  rpc RunSharedExperiment(arvo.research.v1.SharedExperiment) returns (arvo.common.v1.View);
+  rpc RunSharedExperiment(arvo.research.v1.SharedExperiment) returns (arvo.research.v1.StudyView);
   rpc ExportTrades(arvo.research.v1.TradeExport) returns (arvo.common.v1.ExportedPath);
   rpc ExportExperiment(arvo.research.v1.FindingId) returns (arvo.common.v1.ExportedPath);
   rpc ComposeReport(arvo.research.v1.ReportFigure) returns (arvo.common.v1.ExportedPath);

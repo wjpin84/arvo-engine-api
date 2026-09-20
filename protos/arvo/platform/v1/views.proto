@@ -51,19 +51,6 @@ message PluginView {
   PluginStatusView status = 3;
 }
 
-// A finding's caveat, against the script line that produced the finding:
-// what the Problems panel lists with source "Arvo" (ADR-0021).
-message ResearchProblemView {
-  // Relative to the project folder.
-  string path = 1;
-  uint32 line = 2;
-  // `error`, `warning` or `info`.
-  string severity = 3;
-  string message = 4;
-  // The finding it comes from, to open.
-  string finding = 5;
-}
-
 // One signal a plugin publishes, as it stands right now (#163).
 //
 // A signal that is declared and has no value is shown with none, not with
@@ -105,4 +92,155 @@ message StrategyContributionView {
   uint32 configurations = 6;
   // Why it is not in the strategy picker. `None` means it is.
   optional string problem = 7;
+}
+
+// A list, as a message.
+//
+// An RPC returns one message, never a bare repeated field, so a call that
+// answers with a list needs a name for the list. The wrapper is also where
+// a total or a "when this was read" goes later, without renumbering what is
+// already here.
+message JobsView {
+  repeated JobView jobs = 1;
+}
+
+// The plugins this engine hosts. A list, as a message; see `JobsView`.
+message PluginsView {
+  repeated PluginView plugins = 1;
+}
+
+// What the plugins publish. A list, as a message; see `JobsView`.
+message SignalsView {
+  repeated SignalView signals = 1;
+}
+
+// What one extension contributes to the strategy picker.
+//
+// Its own message because a proto map's value cannot itself be repeated.
+message StrategyContributionsView {
+  repeated StrategyContributionView contributions = 1;
+}
+
+// Every extension's contributions, by extension name.
+message ExtensionStrategiesView {
+  map<string, StrategyContributionsView> by_extension = 1;
+}
+
+// One vendor as the Accounts view shows it: what it needs from the
+// person, whether it has it, and what it gives back.
+message AccountView {
+  // The vendor's id: `robinhood`, `alpaca`, `yahoo`.
+  string id = 1;
+  string label = 2;
+  // `none`, `sign_in` or `keys`.
+  string credential = 3;
+  // Whether the credential is there and the vendor can be used. Always
+  // true for one needing nothing.
+  bool connected = 4;
+  // In words: `bars`, `quotes`, `holdings`, `option quotes`.
+  repeated string provides = 5;
+  // The sources under this vendor, by label.
+  repeated string sources = 6;
+  // When one vendor login holds several accounts that each need their own
+  // credential — Alpaca's paper and live, from one login but two key pairs
+  // — each is one of these. Empty for a vendor with a single credential.
+  repeated SubAccountView subaccounts = 7;
+}
+
+// One account under a vendor that has more than one: its own credential and
+// its own state, sharing the vendor's row.
+message SubAccountView {
+  // The vendor's spelling: `paper`, `live`.
+  string id = 1;
+  string label = 2;
+  bool connected = 3;
+  // Real money, so the window can mark it. Paper is not.
+  bool live = 4;
+}
+
+// A person's vendors. A list, as a message; see `JobsView`.
+message AccountsView {
+  repeated AccountView accounts = 1;
+}
+
+// Something that happened while nobody was looking: a plugin dropped, a
+// broker session ended (#150).
+//
+// Every other view answers a question a front end asked. This is the other
+// direction, so it arrives on a stream rather than as a reply.
+//
+// # Why the text is in the payload
+//
+// `title` and `detail` are filled in by the engine rather than derived from
+// the kind by whoever renders it. There are two renderers — the OS
+// notification and the in-app alerts list — and text derived twice is text
+// that drifts. The kind is left for what a renderer needs *structurally*:
+// the status bar needs to know a feed is down, not how to phrase it.
+message EventView {
+  EventKindView kind = 1;
+  string title = 2;
+  string detail = 3;
+  SeverityView severity = 4;
+}
+
+// What happened, structurally.
+message EventKindView {
+  oneof of {
+    PluginEvent plugin = 1;
+    FeedEvent feed = 2;
+    StreamEvent stream = 3;
+    FindingsEvent findings = 4;
+    SessionEvent session = 5;
+  }
+}
+
+message PluginEvent {
+  string id = 1;
+  bool reachable = 2;
+}
+
+// A broker connection came up or went away. `connected: false` covers both
+// signing out and a session that expired underneath you — which of the two
+// it was is in the detail, because the difference matters to a person
+// reading it and not at all to the status bar.
+message FeedEvent {
+  string id = 1;
+  bool connected = 2;
+}
+
+// The live price stream stopped or came back.
+//
+// Its own kind rather than another feed: the status bar reads a feed event
+// to decide whether a broker session is held, and a price socket dropping
+// says nothing about that. Folding the two together would have a Yahoo
+// reconnect claim you had been signed out of your broker.
+//
+// Worth an event at all because the failure is otherwise invisible: a dead
+// socket looks exactly like a market where nothing is trading.
+message StreamEvent {
+  bool live = 1;
+}
+
+// Stored findings went stale since they were last checked — their data
+// changed or disappeared. The count is how many were newly so.
+message FindingsEvent {
+  uint32 count = 1;
+}
+
+// A trading session changed state: starting, running, stopped, halted or
+// failed.
+message SessionEvent {
+  string id = 1;
+  string state = 2;
+}
+
+// Whether this is worth interrupting someone for.
+//
+// The one thing that decides it: a warning raises an OS notification, info
+// only lands in the alerts list. Both are always recorded, so the
+// distinction costs nothing but noise.
+enum SeverityView {
+  SEVERITY_VIEW_UNSPECIFIED = 0;
+  SEVERITY_VIEW_INFO = 1;
+  SEVERITY_VIEW_WARNING = 2;
 }

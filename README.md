@@ -85,9 +85,15 @@ Proto3, additively: new fields and new messages, never a renumbering, so a
 client built against an older copy keeps working. The field numbers are the
 contract.
 
-`View { kind, json }` in `arvo.common.v1` is on its way out, replaced by the
-typed messages in each domain's `views.proto`. While both exist, `kind` names
-the message a `View` is carrying.
+There was a `View { kind, json }` in `arvo.common.v1` and there is not any
+more. Every call names the message it answers with, so a reader in any
+language gets a shape rather than a string and a blob it has to know the
+meaning of out of band.
+
+A call that answers with a list returns a message wrapping it — `SourcesView`,
+`JobsView`, `ProblemsView` — because an RPC returns one message and never a
+bare repeated field. The wrapper is also where a total or a cursor goes later,
+without renumbering what is already there.
 
 ## Generating
 

@@ -7,27 +7,6 @@ package arvo.portfolio.v1;
 
 // What is held, valued, and what changed.
 
-// One vendor as the Accounts view shows it: what it needs from the
-// person, whether it has it, and what it gives back.
-message AccountView {
-  // The vendor's id: `robinhood`, `alpaca`, `yahoo`.
-  string id = 1;
-  string label = 2;
-  // `none`, `sign_in` or `keys`.
-  string credential = 3;
-  // Whether the credential is there and the vendor can be used. Always
-  // true for one needing nothing.
-  bool connected = 4;
-  // In words: `bars`, `quotes`, `holdings`, `option quotes`.
-  repeated string provides = 5;
-  // The sources under this vendor, by label.
-  repeated string sources = 6;
-  // When one vendor login holds several accounts that each need their own
-  // credential — Alpaca's paper and live, from one login but two key pairs
-  // — each is one of these. Empty for a vendor with a single credential.
-  repeated SubAccountView subaccounts = 7;
-}
-
 // The move between the two most recent valuations.
 message ChangeView {
   string from = 1;
@@ -109,17 +88,6 @@ message PortfolioView {
   // When the file was last written, as the file system says: the last
   // sync for a synced account, the last export for an exported one.
   optional string refreshed_at = 17;
-}
-
-// One account under a vendor that has more than one: its own credential and
-// its own state, sharing the vendor's row.
-message SubAccountView {
-  // The vendor's spelling: `paper`, `live`.
-  string id = 1;
-  string label = 2;
-  bool connected = 3;
-  // Real money, so the window can mark it. Paper is not.
-  bool live = 4;
 }
 
 // One day on the value line.

@@ -174,3 +174,23 @@ message SourceView {
   // itself could express nonsense.
   bool needs_keys = 6;
 }
+
+// A list, as a message.
+//
+// An RPC returns one message, never a bare repeated field, so a call that
+// answers with a list needs a name for the list. The wrapper is not
+// ceremony: it is where a total, a cursor or a "when this was read" goes
+// later, without renumbering what is already here.
+message SourcesView {
+  repeated SourceView sources = 1;
+}
+
+// What a search matched. A list, as a message; see `SourcesView`.
+message MatchesView {
+  repeated MatchView matches = 1;
+}
+
+// The watchlist, priced. A list, as a message; see `SourcesView`.
+message WatchlistView {
+  repeated QuoteView rows = 1;
+}

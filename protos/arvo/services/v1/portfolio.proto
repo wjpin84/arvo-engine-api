@@ -4,6 +4,7 @@ package arvo.services.v1;
 
 import "arvo/common/v1/models.proto";
 import "arvo/portfolio/v1/models.proto";
+import "arvo/portfolio/v1/views.proto";
 
 // What is held, valued.
 //
@@ -13,7 +14,7 @@ import "arvo/portfolio/v1/models.proto";
 service Portfolio {
   // Holdings: files the person exported, or ones a connected vendor wrote.
   // Read-only; nothing here places, cancels or modifies an order.
-  rpc ListPortfolios(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc SyncAccounts(arvo.common.v1.Empty) returns (arvo.common.v1.View);
-  rpc SyncPortfolio(arvo.portfolio.v1.PortfolioName) returns (arvo.common.v1.View);
+  rpc ListPortfolios(arvo.common.v1.Empty) returns (arvo.portfolio.v1.PortfolioLibraryView);
+  rpc SyncAccounts(arvo.common.v1.Empty) returns (arvo.portfolio.v1.PortfolioLibraryView);
+  rpc SyncPortfolio(arvo.portfolio.v1.PortfolioName) returns (arvo.portfolio.v1.PortfolioLibraryView);
 }

@@ -23,12 +23,24 @@ message Instruments {
 // are the whole of it. Display only — a tick never becomes a bar, because the
 // data library is fetched files with a content hash and that hash is what
 // makes a stored verdict checkable.
+// One price, as it arrived.
+//
+// Separate from `QuoteView` and deliberately thinner: a tick carries only
+// what moved. Which rows exist, and which of them you hold, is settled once
+// by the `Watchlist` call — a stream that also decided the row set would make
+// a socket blip look like a portfolio change.
+//
+// `regular` is not decoration. Outside 09:30–16:00 the stream keeps sending,
+// on thin volume and wide spreads, and a pre-market print rendered
+// identically to a regular-session one is a worse answer than no price at
+// all. A front end marks it; it does not hide it.
 message QuoteTick {
+  // The bare ticker, matching `QuoteView.symbol`.
   string symbol = 1;
   double price = 2;
+  // Move since the previous close, as a fraction.
   optional double change = 3;
-  // Whether it came from the regular session rather than a pre- or post-market
-  // print.
+  // Whether this print happened in the regular session.
   bool regular = 4;
 }
 
