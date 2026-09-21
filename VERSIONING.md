@@ -54,6 +54,24 @@ it verifies:
 Then it publishes `arvo-api`, then `arvo-client`, then the Python package,
 in that order because each depends on the one before.
 
+## What a release needs, once
+
+- On the repository, the secret `CARGO_REGISTRY_TOKEN`: a crates.io API
+  token allowed to publish `arvo-api` and `arvo-client`.
+- On PyPI, a trusted publisher on the project `arvo-client`: owner
+  `wjpin84`, repository `arvo-engine-api`, workflow `release.yml`,
+  environment `pypi`. The job then needs no secret; its OIDC token is the
+  credential. Create the `pypi` environment on the repository as well.
+- Nothing for the GitHub release itself: the workflow's own token writes it.
+
+The release workflow runs CI first (`ci.yml` is called, not copied), then
+checks that the tag, `rust/Cargo.toml`, `python/pyproject.toml` and the
+changelog agree, then publishes `arvo-api`, `arvo-client`, the Python
+package, and the GitHub release with the changelog section as its notes.
+`buf lint` runs with the protocol's own naming style allowed (a shared
+`SessionId` or `Empty` across calls is deliberate; see `buf.yaml`), and
+`buf breaking` compares against the previous tag when there is one.
+
 ## How to cut one
 
 1. Decide the bump from the table above, looking at the diff of `protos/`

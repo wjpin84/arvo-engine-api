@@ -1,0 +1,83 @@
+# What every change to the contract is held to, and what a release runs
+# first (see VERSIONING.md, "What a release checks"). Reused by release.yml
+# through workflow_call so the two cannot drift.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  protos:
+    name: protos lint and compare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the previous tag, for buf breaking
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
+      - run: buf lint
+      - name: buf breaking against the previous release
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'v*' --exclude "${GITHUB_REF_NAME}" 2>/dev/null || true)
+          if [ -z "$previous" ]; then
+            echo "no previous release tag; nothing to compare against"
+            exit 0
+          fi
+          echo "comparing against $previous"
+          buf breaking --against ".git#tag=$previous"
+
+  bindings:
+    name: bindings match the protos, build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v3
+
+      - name: regenerate the Rust bindings
+        working-directory: rust
+        run: cargo run -p generate
+      - name: regenerate the Python stubs
+        working-directory: python
+        run: |
+          uv sync --group dev
+          uv run python -m grpc_tools.protoc -I ../protos --python_out=src --grpc_python_out=src $(find ../protos -name '*.proto')
+      - name: the committed bindings are the protos' bindings
+        run: |
+          git diff --exit-code -- rust/arvo-api/src/generated rust/arvo-client/src/generated python/src/arvo \
+            || { echo "::error::the generated bindings differ from the protos; run the generators and commit"; exit 1; }
+
+      - name: Rust builds, tests and documents
+        working-directory: rust
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: |
+          cargo build --workspace --locked
+          cargo test --workspace --locked
+          cargo doc --workspace --no-deps --locked
+      - name: arvo-api builds for WebAssembly
+        working-directory: rust
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo check -p arvo-api --target wasm32-unknown-unknown --locked
+
+      - name: Python builds and tests
+        working-directory: python
+        # The client tests need an engine and skip without one; the rest run.
+        run: |
+          uv build
+          uv run pytest -q
