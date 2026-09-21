@@ -6278,6 +6278,34 @@ pub mod sessions_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Sessions", "ListSessions"));
             self.inner.unary(req, path, codec).await
         }
+        /// What the promotion gate would say to StartSession with the same request,
+        /// without starting anything (#194, #199): whether the finding may go to
+        /// that executor, every reason it may not, and what the gate looked at.
+        /// Paper needs no promotion and is always allowed.
+        pub async fn check_promotion(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::session::StartRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::PromotionView>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Sessions/CheckPromotion",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Sessions", "CheckPromotion"));
+            self.inner.unary(req, path, codec).await
+        }
         /// Stop serving and exit. The front end that started this engine asks before
         /// it kills: a killed process runs no destructors, so the providers it
         /// supervises would be orphaned (ADR-0029, ADR-0023 point 5).
@@ -6370,6 +6398,17 @@ pub mod sessions_server {
             request: tonic::Request<::arvo_api::common::Empty>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::session::SessionList>,
+            tonic::Status,
+        >;
+        /// What the promotion gate would say to StartSession with the same request,
+        /// without starting anything (#194, #199): whether the finding may go to
+        /// that executor, every reason it may not, and what the gate looked at.
+        /// Paper needs no promotion and is always allowed.
+        async fn check_promotion(
+            &self,
+            request: tonic::Request<::arvo_api::session::StartRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::session::PromotionView>,
             tonic::Status,
         >;
         /// Stop serving and exit. The front end that started this engine asks before
@@ -6714,6 +6753,51 @@ pub mod sessions_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ListSessionsSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Sessions/CheckPromotion" => {
+                    #[allow(non_camel_case_types)]
+                    struct CheckPromotionSvc<T: Sessions>(pub Arc<T>);
+                    impl<
+                        T: Sessions,
+                    > tonic::server::UnaryService<::arvo_api::session::StartRequest>
+                    for CheckPromotionSvc<T> {
+                        type Response = ::arvo_api::session::PromotionView;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::session::StartRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Sessions>::check_promotion(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = CheckPromotionSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

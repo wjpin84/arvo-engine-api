@@ -22,6 +22,11 @@ service Sessions {
   // halt stands either way. Not lifted from here.
   rpc HaltSession(arvo.session.v1.HaltRequest) returns (arvo.session.v1.SessionStatus);
   rpc ListSessions(arvo.common.v1.Empty) returns (arvo.session.v1.SessionList);
+  // What the promotion gate would say to StartSession with the same request,
+  // without starting anything (#194, #199): whether the finding may go to
+  // that executor, every reason it may not, and what the gate looked at.
+  // Paper needs no promotion and is always allowed.
+  rpc CheckPromotion(arvo.session.v1.StartRequest) returns (arvo.session.v1.PromotionView);
   // Stop serving and exit. The front end that started this engine asks before
   // it kills: a killed process runs no destructors, so the providers it
   // supervises would be orphaned (ADR-0029, ADR-0023 point 5).

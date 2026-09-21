@@ -65,6 +65,11 @@ class SessionsStub(object):
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
                 response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionList.FromString,
                 _registered_method=True)
+        self.CheckPromotion = channel.unary_unary(
+                '/arvo.services.v1.Sessions/CheckPromotion',
+                request_serializer=arvo_dot_session_dot_v1_dot_models__pb2.StartRequest.SerializeToString,
+                response_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.PromotionView.FromString,
+                _registered_method=True)
         self.Shutdown = channel.unary_unary(
                 '/arvo.services.v1.Sessions/Shutdown',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -121,6 +126,16 @@ class SessionsServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def CheckPromotion(self, request, context):
+        """What the promotion gate would say to StartSession with the same request,
+        without starting anything (#194, #199): whether the finding may go to
+        that executor, every reason it may not, and what the gate looked at.
+        Paper needs no promotion and is always allowed.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def Shutdown(self, request, context):
         """Stop serving and exit. The front end that started this engine asks before
         it kills: a killed process runs no destructors, so the providers it
@@ -162,6 +177,11 @@ def add_SessionsServicer_to_server(servicer, server):
                     servicer.ListSessions,
                     request_deserializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.FromString,
                     response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.SessionList.SerializeToString,
+            ),
+            'CheckPromotion': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckPromotion,
+                    request_deserializer=arvo_dot_session_dot_v1_dot_models__pb2.StartRequest.FromString,
+                    response_serializer=arvo_dot_session_dot_v1_dot_models__pb2.PromotionView.SerializeToString,
             ),
             'Shutdown': grpc.unary_unary_rpc_method_handler(
                     servicer.Shutdown,
@@ -331,6 +351,33 @@ class Sessions(object):
             '/arvo.services.v1.Sessions/ListSessions',
             arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
             arvo_dot_session_dot_v1_dot_models__pb2.SessionList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CheckPromotion(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Sessions/CheckPromotion',
+            arvo_dot_session_dot_v1_dot_models__pb2.StartRequest.SerializeToString,
+            arvo_dot_session_dot_v1_dot_models__pb2.PromotionView.FromString,
             options,
             channel_credentials,
             insecure,

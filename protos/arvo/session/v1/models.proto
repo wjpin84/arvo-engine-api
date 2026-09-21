@@ -57,6 +57,22 @@ message SessionStatus {
   repeated string warnings = 19;
 }
 
+// The promotion gate's answer for one finding and one executor (#194).
+message PromotionView {
+  bool allowed = 1;
+  // Every reason it is not, in the gate's words. Empty when allowed.
+  repeated string reasons = 2;
+  // The finding's own verdict: Supported, NotSupported or Inconclusive.
+  // Empty when the finding cannot be opened.
+  string verdict = 3;
+  // Days the finding has run on paper, by its paper record; absent when it
+  // has not.
+  optional int64 paper_days = 4;
+  // The paper session's last verdict against the finding (holding,
+  // diverging, inconclusive), when it has one.
+  optional string paper_verdict = 5;
+}
+
 message SessionList {
   repeated SessionStatus sessions = 1;
 }

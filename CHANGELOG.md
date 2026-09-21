@@ -14,6 +14,9 @@ A minor bump: one message grew.
   against 0.1.0 reads an empty verdict and no reason.
 - **`SessionStatus.warnings`.** The gate's limits the session is within
   four fifths of, in the gate's words (#191). Empty for an older engine.
+- **`Sessions.CheckPromotion` and `PromotionView`.** What the promotion
+  gate would say to a start, without starting (#194, #199). An older
+  engine answers `Unimplemented`.
 
 ## 0.1.0 (2026-09-21)
 

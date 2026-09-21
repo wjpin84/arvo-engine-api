@@ -80,6 +80,28 @@ pub struct SessionStatus {
     #[prost(string, repeated, tag = "19")]
     pub warnings: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
+/// The promotion gate's answer for one finding and one executor (#194).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PromotionView {
+    #[prost(bool, tag = "1")]
+    pub allowed: bool,
+    /// Every reason it is not, in the gate's words. Empty when allowed.
+    #[prost(string, repeated, tag = "2")]
+    pub reasons: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// The finding's own verdict: Supported, NotSupported or Inconclusive.
+    /// Empty when the finding cannot be opened.
+    #[prost(string, tag = "3")]
+    pub verdict: ::prost::alloc::string::String,
+    /// Days the finding has run on paper, by its paper record; absent when it
+    /// has not.
+    #[prost(int64, optional, tag = "4")]
+    pub paper_days: ::core::option::Option<i64>,
+    /// The paper session's last verdict against the finding (holding,
+    /// diverging, inconclusive), when it has one.
+    #[prost(string, optional, tag = "5")]
+    pub paper_verdict: ::core::option::Option<::prost::alloc::string::String>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionList {
