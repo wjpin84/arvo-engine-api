@@ -55,6 +55,26 @@ message SessionStatus {
   // The gate's limits this session is within four fifths of (#191), in the
   // gate's words: "drawdown 8.1% of a 10.0% limit". Empty while halted.
   repeated string warnings = 19;
+  // What the fills cost against the decision prices (#18): the divergence a
+  // paper session exists to measure. Absent until something filled.
+  optional Divergence divergence = 20;
+}
+
+// Measured against assumed, over a session's fills so far (#18).
+message Divergence {
+  uint32 fills = 1;
+  // Approved orders that never filled. Never averaged into the slippage: a
+  // backtest assumes every order fills, so this has nothing to compare to.
+  uint32 unfilled = 2;
+  // Mean adverse slippage across the fills, in basis points; positive is
+  // worse than the decision price, whichever way the order went.
+  double mean_slippage_bps = 3;
+  double worst_slippage_bps = 4;
+  // Signal to fill.
+  double mean_latency_ms = 5;
+  int64 worst_latency_ms = 6;
+  // What the finding's cost model assumed, so the difference is readable.
+  optional double assumed_slippage_bps = 7;
 }
 
 // The promotion gate's answer for one finding and one executor (#194).

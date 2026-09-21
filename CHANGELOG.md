@@ -3,6 +3,13 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+- **`SessionStatus.divergence`** and the `Divergence` message (#18): what a
+  session's fills cost against their decision prices, and the latency, with
+  the slippage the finding assumed beside them. Absent until something
+  filled, and for an older engine.
+
 ## 0.2.0 (2026-09-21)
 
 A minor bump, all additive: messages grew and two services gained calls. A

@@ -29,7 +29,7 @@ pub struct HaltRequest {
     pub reason: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionStatus {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
@@ -79,6 +79,35 @@ pub struct SessionStatus {
     /// gate's words: "drawdown 8.1% of a 10.0% limit". Empty while halted.
     #[prost(string, repeated, tag = "19")]
     pub warnings: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// What the fills cost against the decision prices (#18): the divergence a
+    /// paper session exists to measure. Absent until something filled.
+    #[prost(message, optional, tag = "20")]
+    pub divergence: ::core::option::Option<Divergence>,
+}
+/// Measured against assumed, over a session's fills so far (#18).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct Divergence {
+    #[prost(uint32, tag = "1")]
+    pub fills: u32,
+    /// Approved orders that never filled. Never averaged into the slippage: a
+    /// backtest assumes every order fills, so this has nothing to compare to.
+    #[prost(uint32, tag = "2")]
+    pub unfilled: u32,
+    /// Mean adverse slippage across the fills, in basis points; positive is
+    /// worse than the decision price, whichever way the order went.
+    #[prost(double, tag = "3")]
+    pub mean_slippage_bps: f64,
+    #[prost(double, tag = "4")]
+    pub worst_slippage_bps: f64,
+    /// Signal to fill.
+    #[prost(double, tag = "5")]
+    pub mean_latency_ms: f64,
+    #[prost(int64, tag = "6")]
+    pub worst_latency_ms: i64,
+    /// What the finding's cost model assumed, so the difference is readable.
+    #[prost(double, optional, tag = "7")]
+    pub assumed_slippage_bps: ::core::option::Option<f64>,
 }
 /// The promotion gate's answer for one finding and one executor (#194).
 #[derive(serde::Serialize, serde::Deserialize)]
