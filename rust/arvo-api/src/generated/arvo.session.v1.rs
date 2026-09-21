@@ -75,6 +75,10 @@ pub struct SessionStatus {
     /// Why it is diverging, when it is: what was seen against what was expected.
     #[prost(string, optional, tag = "18")]
     pub verdict_reason: ::core::option::Option<::prost::alloc::string::String>,
+    /// The gate's limits this session is within four fifths of (#191), in the
+    /// gate's words: "drawdown 8.1% of a 10.0% limit". Empty while halted.
+    #[prost(string, repeated, tag = "19")]
+    pub warnings: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]

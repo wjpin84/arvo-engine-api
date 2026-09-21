@@ -52,6 +52,9 @@ message SessionStatus {
   string verdict = 17;
   // Why it is diverging, when it is: what was seen against what was expected.
   optional string verdict_reason = 18;
+  // The gate's limits this session is within four fifths of (#191), in the
+  // gate's words: "drawdown 8.1% of a 10.0% limit". Empty while halted.
+  repeated string warnings = 19;
 }
 
 message SessionList {

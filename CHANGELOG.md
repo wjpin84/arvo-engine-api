@@ -12,6 +12,8 @@ A minor bump: one message grew.
   judged from its own trades against the finding's out-of-sample
   expectation, with the reason when it is diverging (#221). A client built
   against 0.1.0 reads an empty verdict and no reason.
+- **`SessionStatus.warnings`.** The gate's limits the session is within
+  four fifths of, in the gate's words (#191). Empty for an older engine.
 
 ## 0.1.0 (2026-09-21)
 
