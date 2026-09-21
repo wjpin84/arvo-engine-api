@@ -67,6 +67,14 @@ pub struct SessionStatus {
     /// Whether a frozen session has been reconciled, so ResumeSession is allowed.
     #[prost(bool, tag = "16")]
     pub reconciled: bool,
+    /// Whether the rule is still the rule its finding described: holding,
+    /// diverging or inconclusive, judged from the session's own trades against
+    /// the finding's out-of-sample expectation (#221). Never a risk limit.
+    #[prost(string, tag = "17")]
+    pub verdict: ::prost::alloc::string::String,
+    /// Why it is diverging, when it is: what was seen against what was expected.
+    #[prost(string, optional, tag = "18")]
+    pub verdict_reason: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]

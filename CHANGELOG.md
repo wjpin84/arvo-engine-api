@@ -3,6 +3,16 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+A minor bump: one message grew.
+
+- **`SessionStatus.verdict` and `verdict_reason`.** A session's verdict in
+  the research vocabulary — `holding`, `diverging` or `inconclusive` —
+  judged from its own trades against the finding's out-of-sample
+  expectation, with the reason when it is diverging (#221). A client built
+  against 0.1.0 reads an empty verdict and no reason.
+
 ## 0.1.0 (2026-09-21)
 
 The first version of the contract as a published thing. Nothing shipped to

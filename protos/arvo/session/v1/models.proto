@@ -46,6 +46,12 @@ message SessionStatus {
   optional string frozen = 15;
   // Whether a frozen session has been reconciled, so ResumeSession is allowed.
   bool reconciled = 16;
+  // Whether the rule is still the rule its finding described: holding,
+  // diverging or inconclusive, judged from the session's own trades against
+  // the finding's out-of-sample expectation (#221). Never a risk limit.
+  string verdict = 17;
+  // Why it is diverging, when it is: what was seen against what was expected.
+  optional string verdict_reason = 18;
 }
 
 message SessionList {
