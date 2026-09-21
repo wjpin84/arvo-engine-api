@@ -678,6 +678,17 @@ message WalkForwardView {
 }
 
 // One bar, as the chart wants it.
+// The review after the close (#217): what the day's sessions did, read back
+// off their records, as a person reads it.
+message ReviewView {
+  string day = 1;
+  string markdown = 2;
+  // Where it is written under the project, so it can be opened.
+  string path = 3;
+  // Whether this call wrote it, or read one written before.
+  bool written_now = 4;
+}
+
 // One bar of the library, as the research tier reads it (#195).
 message BarView {
   // When the bar opened.

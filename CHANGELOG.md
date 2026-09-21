@@ -5,6 +5,9 @@ bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
 ## Unreleased
 
+- **`Research.ViewReview`**, with `ReviewRequest` and `ReviewView` (#217):
+  the review after the close for a day, as Markdown, written under the
+  project's `reviews/` if it was not already.
 - **`SessionStatus.divergence`** and the `Divergence` message (#18): what a
   session's fills cost against their decision prices, and the latency, with
   the slippage the finding assumed beside them. Absent until something

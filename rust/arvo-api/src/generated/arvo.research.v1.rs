@@ -200,6 +200,14 @@ pub struct BarsRequest {
     #[prost(uint32, optional, tag = "5")]
     pub last: ::core::option::Option<u32>,
 }
+/// The review after the close (#217), by day.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ReviewRequest {
+    /// YYYY-MM-DD, UTC. Today when absent.
+    #[prost(string, optional, tag = "1")]
+    pub day: ::core::option::Option<::prost::alloc::string::String>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct StudyRequest {
@@ -1499,6 +1507,22 @@ pub struct WalkForwardView {
     pub engine: ::prost::alloc::string::String,
 }
 /// One bar, as the chart wants it.
+/// The review after the close (#217): what the day's sessions did, read back
+/// off their records, as a person reads it.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ReviewView {
+    #[prost(string, tag = "1")]
+    pub day: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub markdown: ::prost::alloc::string::String,
+    /// Where it is written under the project, so it can be opened.
+    #[prost(string, tag = "3")]
+    pub path: ::prost::alloc::string::String,
+    /// Whether this call wrote it, or read one written before.
+    #[prost(bool, tag = "4")]
+    pub written_now: bool,
+}
 /// One bar of the library, as the research tier reads it (#195).
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]

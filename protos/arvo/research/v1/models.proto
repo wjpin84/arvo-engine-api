@@ -140,6 +140,12 @@ message BarsRequest {
   optional uint32 last = 5;
 }
 
+// The review after the close (#217), by day.
+message ReviewRequest {
+  // YYYY-MM-DD, UTC. Today when absent.
+  optional string day = 1;
+}
+
 message StudyRequest {
   string instrument = 1;
   // A rule or ruleset name; the default rule when absent.

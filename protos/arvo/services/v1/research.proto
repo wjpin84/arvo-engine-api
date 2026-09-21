@@ -47,6 +47,10 @@ service Research {
   rpc ReadBars(arvo.research.v1.BarsRequest) returns (arvo.research.v1.BarsView);
   // The regime of each bar in the window, labelled after the fact.
   rpc ViewRegime(arvo.research.v1.BarsRequest) returns (arvo.research.v1.RegimeView);
+  // The review after the close for a day (#217), written if it was not, read
+  // as written if it was. What the sessions did, against what the findings
+  // said; nothing here reaches a session.
+  rpc ViewReview(arvo.research.v1.ReviewRequest) returns (arvo.research.v1.ReviewView);
   rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.research.v1.ProblemsView);
   rpc ListAttachments(arvo.research.v1.FindingId) returns (arvo.research.v1.Attachments);
   // What happened, as it happens: every event the engine raises, as a View

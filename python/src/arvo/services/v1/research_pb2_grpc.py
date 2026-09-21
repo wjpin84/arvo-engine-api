@@ -153,6 +153,11 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.FromString,
                 _registered_method=True)
+        self.ViewReview = channel.unary_unary(
+                '/arvo.services.v1.Research/ViewReview',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.FromString,
+                _registered_method=True)
         self.ViewProblems = channel.unary_unary(
                 '/arvo.services.v1.Research/ViewProblems',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -326,6 +331,15 @@ class ResearchServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ViewReview(self, request, context):
+        """The review after the close for a day (#217), written if it was not, read
+        as written if it was. What the sessions did, against what the findings
+        said; nothing here reaches a session.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ViewProblems(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -463,6 +477,11 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.ViewRegime,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.SerializeToString,
+            ),
+            'ViewReview': grpc.unary_unary_rpc_method_handler(
+                    servicer.ViewReview,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.SerializeToString,
             ),
             'ViewProblems': grpc.unary_unary_rpc_method_handler(
                     servicer.ViewProblems,
@@ -1101,6 +1120,33 @@ class Research(object):
             '/arvo.services.v1.Research/ViewRegime',
             arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
             arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ViewReview(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ViewReview',
+            arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.FromString,
             options,
             channel_credentials,
             insecure,
