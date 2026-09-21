@@ -126,6 +126,20 @@ message RunRequest {
   string origin = 4;
 }
 
+// Bars, or the regimes read off them, over a window of the library (#195).
+message BarsRequest {
+  string instrument = 1;
+  // "1day" when absent; "5minute" and the other minute steps where the
+  // library holds them.
+  optional string interval = 2;
+  // YYYY-MM-DD, inclusive. The library's whole range when absent.
+  optional string from = 3;
+  optional string to = 4;
+  // At most this many bars, from the end of the window. 60 when absent;
+  // never more than 2000.
+  optional uint32 last = 5;
+}
+
 message StudyRequest {
   string instrument = 1;
   // A rule or ruleset name; the default rule when absent.

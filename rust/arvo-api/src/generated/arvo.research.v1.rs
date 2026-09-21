@@ -180,6 +180,26 @@ pub struct RunRequest {
     #[prost(string, tag = "4")]
     pub origin: ::prost::alloc::string::String,
 }
+/// Bars, or the regimes read off them, over a window of the library (#195).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct BarsRequest {
+    #[prost(string, tag = "1")]
+    pub instrument: ::prost::alloc::string::String,
+    /// "1day" when absent; "5minute" and the other minute steps where the
+    /// library holds them.
+    #[prost(string, optional, tag = "2")]
+    pub interval: ::core::option::Option<::prost::alloc::string::String>,
+    /// YYYY-MM-DD, inclusive. The library's whole range when absent.
+    #[prost(string, optional, tag = "3")]
+    pub from: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "4")]
+    pub to: ::core::option::Option<::prost::alloc::string::String>,
+    /// At most this many bars, from the end of the window. 60 when absent;
+    /// never more than 2000.
+    #[prost(uint32, optional, tag = "5")]
+    pub last: ::core::option::Option<u32>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct StudyRequest {
@@ -1479,6 +1499,65 @@ pub struct WalkForwardView {
     pub engine: ::prost::alloc::string::String,
 }
 /// One bar, as the chart wants it.
+/// One bar of the library, as the research tier reads it (#195).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BarView {
+    /// When the bar opened.
+    #[prost(string, tag = "1")]
+    pub at: ::prost::alloc::string::String,
+    #[prost(double, tag = "2")]
+    pub open: f64,
+    #[prost(double, tag = "3")]
+    pub high: f64,
+    #[prost(double, tag = "4")]
+    pub low: f64,
+    #[prost(double, tag = "5")]
+    pub close: f64,
+    #[prost(double, tag = "6")]
+    pub volume: f64,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BarsView {
+    #[prost(string, tag = "1")]
+    pub instrument: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub interval: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
+    pub bars: ::prost::alloc::vec::Vec<BarView>,
+}
+/// The regime each bar closed in: "trending up", "trending down" or
+/// "ranging", absent until the lookback has filled. Labelled after the fact
+/// over the closes, so it says what the market was doing and not what a rule
+/// could have known at the time.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RegimePointView {
+    #[prost(string, tag = "1")]
+    pub at: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "2")]
+    pub regime: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RegimeView {
+    #[prost(string, tag = "1")]
+    pub instrument: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub interval: ::prost::alloc::string::String,
+    /// Bars each label looks back over.
+    #[prost(uint32, tag = "3")]
+    pub lookback: u32,
+    /// The last bar's regime, when it has one.
+    #[prost(string, optional, tag = "4")]
+    pub current: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, repeated, tag = "5")]
+    pub points: ::prost::alloc::vec::Vec<RegimePointView>,
+    /// How many of the returned bars were in each regime.
+    #[prost(map = "string, uint32", tag = "6")]
+    pub shares: ::std::collections::HashMap<::prost::alloc::string::String, u32>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct CandlePoint {

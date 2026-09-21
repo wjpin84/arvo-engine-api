@@ -3179,6 +3179,57 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "ViewComparison"));
             self.inner.unary(req, path, codec).await
         }
+        /// The library's bars over a window, read-only (#195): what a study saw,
+        /// for an agent that can run but could not look. Nothing here fetches.
+        pub async fn read_bars(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::BarsView>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/ReadBars",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "ReadBars"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// The regime of each bar in the window, labelled after the fact.
+        pub async fn view_regime(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RegimeView>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/ViewRegime",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "ViewRegime"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn view_problems(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -3425,6 +3476,23 @@ pub mod research_server {
             request: tonic::Request<::arvo_api::research::FindingIds>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::ComparisonView>,
+            tonic::Status,
+        >;
+        /// The library's bars over a window, read-only (#195): what a study saw,
+        /// for an agent that can run but could not look. Nothing here fetches.
+        async fn read_bars(
+            &self,
+            request: tonic::Request<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::BarsView>,
+            tonic::Status,
+        >;
+        /// The regime of each bar in the window, labelled after the fact.
+        async fn view_regime(
+            &self,
+            request: tonic::Request<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RegimeView>,
             tonic::Status,
         >;
         async fn view_problems(
@@ -4463,6 +4531,96 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ViewComparisonSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/ReadBars" => {
+                    #[allow(non_camel_case_types)]
+                    struct ReadBarsSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::BarsRequest>
+                    for ReadBarsSvc<T> {
+                        type Response = ::arvo_api::research::BarsView;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::BarsRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::read_bars(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ReadBarsSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/ViewRegime" => {
+                    #[allow(non_camel_case_types)]
+                    struct ViewRegimeSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::BarsRequest>
+                    for ViewRegimeSvc<T> {
+                        type Response = ::arvo_api::research::RegimeView;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::BarsRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::view_regime(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ViewRegimeSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

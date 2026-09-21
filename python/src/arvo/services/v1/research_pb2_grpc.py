@@ -143,6 +143,16 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.FindingIds.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.ComparisonView.FromString,
                 _registered_method=True)
+        self.ReadBars = channel.unary_unary(
+                '/arvo.services.v1.Research/ReadBars',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
+                _registered_method=True)
+        self.ViewRegime = channel.unary_unary(
+                '/arvo.services.v1.Research/ViewRegime',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.FromString,
+                _registered_method=True)
         self.ViewProblems = channel.unary_unary(
                 '/arvo.services.v1.Research/ViewProblems',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -301,6 +311,21 @@ class ResearchServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ReadBars(self, request, context):
+        """The library's bars over a window, read-only (#195): what a study saw,
+        for an agent that can run but could not look. Nothing here fetches.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ViewRegime(self, request, context):
+        """The regime of each bar in the window, labelled after the fact.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ViewProblems(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -428,6 +453,16 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.ViewComparison,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.FindingIds.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.ComparisonView.SerializeToString,
+            ),
+            'ReadBars': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReadBars,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.SerializeToString,
+            ),
+            'ViewRegime': grpc.unary_unary_rpc_method_handler(
+                    servicer.ViewRegime,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.SerializeToString,
             ),
             'ViewProblems': grpc.unary_unary_rpc_method_handler(
                     servicer.ViewProblems,
@@ -1012,6 +1047,60 @@ class Research(object):
             '/arvo.services.v1.Research/ViewComparison',
             arvo_dot_research_dot_v1_dot_models__pb2.FindingIds.SerializeToString,
             arvo_dot_research_dot_v1_dot_views__pb2.ComparisonView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReadBars(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ReadBars',
+            arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ViewRegime(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ViewRegime',
+            arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.RegimeView.FromString,
             options,
             channel_credentials,
             insecure,

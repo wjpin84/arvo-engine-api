@@ -3,9 +3,11 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
+## 0.2.0 (2026-09-21)
 
-A minor bump: one message grew.
+A minor bump, all additive: messages grew and two services gained calls. A
+client built against 0.1.0 reads empty fields and an older engine answers
+`Unimplemented` to the new calls.
 
 - **`SessionStatus.verdict` and `verdict_reason`.** A session's verdict in
   the research vocabulary — `holding`, `diverging` or `inconclusive` —
@@ -17,6 +19,10 @@ A minor bump: one message grew.
 - **`Sessions.CheckPromotion` and `PromotionView`.** What the promotion
   gate would say to a start, without starting (#194, #199). An older
   engine answers `Unimplemented`.
+- **`Research.ReadBars` and `Research.ViewRegime`**, with `BarsRequest`,
+  `BarsView`, `BarView`, `RegimeView` and `RegimePointView` (#195). The
+  research tier can now look at what a study saw: bars over a window, and
+  the regime each bar closed in. Read-only; nothing here fetches.
 
 ## 0.1.0 (2026-09-21)
 

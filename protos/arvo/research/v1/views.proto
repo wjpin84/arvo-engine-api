@@ -678,6 +678,44 @@ message WalkForwardView {
 }
 
 // One bar, as the chart wants it.
+// One bar of the library, as the research tier reads it (#195).
+message BarView {
+  // When the bar opened.
+  string at = 1;
+  double open = 2;
+  double high = 3;
+  double low = 4;
+  double close = 5;
+  double volume = 6;
+}
+
+message BarsView {
+  string instrument = 1;
+  string interval = 2;
+  repeated BarView bars = 3;
+}
+
+// The regime each bar closed in: "trending up", "trending down" or
+// "ranging", absent until the lookback has filled. Labelled after the fact
+// over the closes, so it says what the market was doing and not what a rule
+// could have known at the time.
+message RegimePointView {
+  string at = 1;
+  optional string regime = 2;
+}
+
+message RegimeView {
+  string instrument = 1;
+  string interval = 2;
+  // Bars each label looks back over.
+  uint32 lookback = 3;
+  // The last bar's regime, when it has one.
+  optional string current = 4;
+  repeated RegimePointView points = 5;
+  // How many of the returned bars were in each regime.
+  map<string, uint32> shares = 6;
+}
+
 message CandlePoint {
   int64 time = 1;
   double open = 2;

@@ -42,6 +42,11 @@ service Research {
   rpc ViewRecord(arvo.research.v1.FindingId) returns (arvo.research.v1.RecordView);
   rpc ViewReplay(arvo.research.v1.FindingId) returns (arvo.research.v1.ReplayView);
   rpc ViewComparison(arvo.research.v1.FindingIds) returns (arvo.research.v1.ComparisonView);
+  // The library's bars over a window, read-only (#195): what a study saw,
+  // for an agent that can run but could not look. Nothing here fetches.
+  rpc ReadBars(arvo.research.v1.BarsRequest) returns (arvo.research.v1.BarsView);
+  // The regime of each bar in the window, labelled after the fact.
+  rpc ViewRegime(arvo.research.v1.BarsRequest) returns (arvo.research.v1.RegimeView);
   rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.research.v1.ProblemsView);
   rpc ListAttachments(arvo.research.v1.FindingId) returns (arvo.research.v1.Attachments);
   // What happened, as it happens: every event the engine raises, as a View

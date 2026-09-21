@@ -14,7 +14,7 @@ include = ["src/**", "README.md"]
 
 [dependencies]
 # Same version, always: the stubs here name the types there.
-arvo-api = { version = "=0.1.0", path = "../arvo-api" }
+arvo-api = { version = "=0.2.0", path = "../arvo-api" }
 prost.workspace = true
 serde.workspace = true
 serde_json.workspace = true
