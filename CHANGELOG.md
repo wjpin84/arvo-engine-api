@@ -3,7 +3,11 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
+## 0.3.0 (2026-09-21)
+
+A minor bump, all additive: a message and a call. A client built against
+0.2.0 reads no divergence and an older engine answers `Unimplemented` to
+the review.
 
 - **`Research.ViewReview`**, with `ReviewRequest` and `ReviewView` (#217):
   the review after the close for a day, as Markdown, written under the

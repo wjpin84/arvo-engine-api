@@ -5,7 +5,7 @@ members = ["arvo-api", "arvo-client", "generate"]
 # One version for the protos and every binding of them. Bump it here and in
 # ../python/pyproject.toml together; see ../VERSIONING.md for which part.
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"

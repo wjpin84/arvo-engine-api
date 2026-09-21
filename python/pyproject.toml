@@ -1,7 +1,7 @@
 [project]
 # `arvo` on PyPI belongs to someone else; the module is still `arvo`.
 name = "arvo-client"
-version = "0.2.0"
+version = "0.3.0"
 description = "Arvo's engine from Python: a research client that reads findings and runs studies, and the generated stubs for every service."
 readme = "README.md"
 license = "Apache-2.0"
