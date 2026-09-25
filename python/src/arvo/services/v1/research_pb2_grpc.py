@@ -158,6 +158,11 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.FromString,
                 _registered_method=True)
+        self.RankFindings = channel.unary_unary(
+                '/arvo.services.v1.Research/RankFindings',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RankRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.Ranking.FromString,
+                _registered_method=True)
         self.ViewProblems = channel.unary_unary(
                 '/arvo.services.v1.Research/ViewProblems',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -340,6 +345,14 @@ class ResearchServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RankFindings(self, request, context):
+        """The leaderboard (#226): every comparable finding in the one order the
+        research tier ranks by. Reads the store; reaches nothing.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ViewProblems(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -482,6 +495,11 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.ViewReview,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.SerializeToString,
+            ),
+            'RankFindings': grpc.unary_unary_rpc_method_handler(
+                    servicer.RankFindings,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RankRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.Ranking.SerializeToString,
             ),
             'ViewProblems': grpc.unary_unary_rpc_method_handler(
                     servicer.ViewProblems,
@@ -1147,6 +1165,33 @@ class Research(object):
             '/arvo.services.v1.Research/ViewReview',
             arvo_dot_research_dot_v1_dot_models__pb2.ReviewRequest.SerializeToString,
             arvo_dot_research_dot_v1_dot_views__pb2.ReviewView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RankFindings(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/RankFindings',
+            arvo_dot_research_dot_v1_dot_models__pb2.RankRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.Ranking.FromString,
             options,
             channel_credentials,
             insecure,

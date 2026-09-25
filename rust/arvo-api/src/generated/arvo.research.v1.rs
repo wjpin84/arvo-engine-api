@@ -200,6 +200,17 @@ pub struct BarsRequest {
     #[prost(uint32, optional, tag = "5")]
     pub last: ::core::option::Option<u32>,
 }
+/// The leaderboard's filter (#226). Empty is every finding.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RankRequest {
+    /// The rule's name, as the finding recorded it.
+    #[prost(string, optional, tag = "1")]
+    pub rule: ::core::option::Option<::prost::alloc::string::String>,
+    /// SYMBOL.VENUE.
+    #[prost(string, optional, tag = "2")]
+    pub instrument: ::core::option::Option<::prost::alloc::string::String>,
+}
 /// The review after the close (#217), by day.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
@@ -1639,4 +1650,62 @@ pub struct ResearchProblemView {
 pub struct ProblemsView {
     #[prost(message, repeated, tag = "1")]
     pub problems: ::prost::alloc::vec::Vec<ResearchProblemView>,
+}
+/// One finding on the leaderboard (#226).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RankingRowView {
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub subject: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub kind: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub rule: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub interval: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub verdict: ::prost::alloc::string::String,
+    /// The verdict under the conservative cost tier, or empty when the run
+    /// was not asked: a result refused on its own terms is not.
+    #[prost(string, tag = "7")]
+    pub conservative_verdict: ::prost::alloc::string::String,
+    /// Mean profit per closed out-of-sample trade: under the conservative tier
+    /// when it was measured, otherwise under the stated costs.
+    #[prost(double, tag = "8")]
+    pub expectancy: f64,
+    /// "conservative" or "stated": which costs the expectancy is under.
+    #[prost(string, tag = "9")]
+    pub expectancy_costs: ::prost::alloc::string::String,
+    /// Read it; it is never the order.
+    #[prost(double, tag = "10")]
+    pub total_return: f64,
+    #[prost(double, tag = "11")]
+    pub max_drawdown: f64,
+    #[prost(uint32, tag = "12")]
+    pub trades: u32,
+    /// The regimes the out-of-sample trades opened in, distinct.
+    #[prost(string, repeated, tag = "13")]
+    pub regimes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// How many configurations the search tried, when the finding says.
+    #[prost(uint32, optional, tag = "14")]
+    pub search: ::core::option::Option<u32>,
+    #[prost(string, tag = "15")]
+    pub recorded_at: ::prost::alloc::string::String,
+    #[prost(bool, optional, tag = "16")]
+    pub stale: ::core::option::Option<bool>,
+}
+/// The leaderboard (#226): findings in one order and only one. Supported
+/// under the conservative tier first, by that expectancy; then Supported
+/// under the stated costs where the conservative tier was never measured;
+/// then everything else, whatever its number. Ties by drawdown, then trades.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Ranking {
+    #[prost(message, repeated, tag = "1")]
+    pub rows: ::prost::alloc::vec::Vec<RankingRowView>,
+    /// Findings that could not be read, and why.
+    #[prost(string, repeated, tag = "2")]
+    pub notes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }

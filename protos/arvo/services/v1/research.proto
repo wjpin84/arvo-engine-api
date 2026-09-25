@@ -51,6 +51,9 @@ service Research {
   // as written if it was. What the sessions did, against what the findings
   // said; nothing here reaches a session.
   rpc ViewReview(arvo.research.v1.ReviewRequest) returns (arvo.research.v1.ReviewView);
+  // The leaderboard (#226): every comparable finding in the one order the
+  // research tier ranks by. Reads the store; reaches nothing.
+  rpc RankFindings(arvo.research.v1.RankRequest) returns (arvo.research.v1.Ranking);
   rpc ViewProblems(arvo.common.v1.Empty) returns (arvo.research.v1.ProblemsView);
   rpc ListAttachments(arvo.research.v1.FindingId) returns (arvo.research.v1.Attachments);
   // What happened, as it happens: every event the engine raises, as a View

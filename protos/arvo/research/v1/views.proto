@@ -766,3 +766,41 @@ message ResearchProblemView {
 message ProblemsView {
   repeated ResearchProblemView problems = 1;
 }
+
+// One finding on the leaderboard (#226).
+message RankingRowView {
+  string id = 1;
+  string subject = 2;
+  string kind = 3;
+  string rule = 4;
+  string interval = 5;
+  string verdict = 6;
+  // The verdict under the conservative cost tier, or empty when the run
+  // was not asked: a result refused on its own terms is not.
+  string conservative_verdict = 7;
+  // Mean profit per closed out-of-sample trade: under the conservative tier
+  // when it was measured, otherwise under the stated costs.
+  double expectancy = 8;
+  // "conservative" or "stated": which costs the expectancy is under.
+  string expectancy_costs = 9;
+  // Read it; it is never the order.
+  double total_return = 10;
+  double max_drawdown = 11;
+  uint32 trades = 12;
+  // The regimes the out-of-sample trades opened in, distinct.
+  repeated string regimes = 13;
+  // How many configurations the search tried, when the finding says.
+  optional uint32 search = 14;
+  string recorded_at = 15;
+  optional bool stale = 16;
+}
+
+// The leaderboard (#226): findings in one order and only one. Supported
+// under the conservative tier first, by that expectancy; then Supported
+// under the stated costs where the conservative tier was never measured;
+// then everything else, whatever its number. Ties by drawdown, then trades.
+message Ranking {
+  repeated RankingRowView rows = 1;
+  // Findings that could not be read, and why.
+  repeated string notes = 2;
+}

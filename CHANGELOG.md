@@ -3,6 +3,13 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+- **`Research.RankFindings`**, with `RankRequest`, `Ranking` and
+  `RankingRowView` (#226): the leaderboard, every comparable finding in the
+  one order the research tier ranks by (Supported under conservative costs
+  first, by that expectancy; ties by drawdown, then trades). Additive.
+
 ## 0.3.0 (2026-09-21)
 
 A minor bump, all additive: a message and a call. A client built against

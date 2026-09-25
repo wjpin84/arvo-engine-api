@@ -3257,6 +3257,32 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "ViewReview"));
             self.inner.unary(req, path, codec).await
         }
+        /// The leaderboard (#226): every comparable finding in the one order the
+        /// research tier ranks by. Reads the store; reaches nothing.
+        pub async fn rank_findings(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::RankRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::Ranking>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/RankFindings",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "RankFindings"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn view_problems(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -3530,6 +3556,15 @@ pub mod research_server {
             request: tonic::Request<::arvo_api::research::ReviewRequest>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::ReviewView>,
+            tonic::Status,
+        >;
+        /// The leaderboard (#226): every comparable finding in the one order the
+        /// research tier ranks by. Reads the store; reaches nothing.
+        async fn rank_findings(
+            &self,
+            request: tonic::Request<::arvo_api::research::RankRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::Ranking>,
             tonic::Status,
         >;
         async fn view_problems(
@@ -4703,6 +4738,51 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ViewReviewSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/RankFindings" => {
+                    #[allow(non_camel_case_types)]
+                    struct RankFindingsSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::RankRequest>
+                    for RankFindingsSvc<T> {
+                        type Response = ::arvo_api::research::Ranking;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::RankRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::rank_findings(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = RankFindingsSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
