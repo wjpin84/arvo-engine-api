@@ -227,6 +227,20 @@ class Engine:
             for s in reply.strategies
         ]
 
+    def rank_findings(self, *, rule: str | None = None, instrument: str | None = None) -> Any:
+        """The leaderboard (#226): every comparable finding in the one order
+        Arvo ranks by. Supported under the conservative cost tier first, by
+        mean profit per trade under that tier; then Supported under the stated
+        costs where the tier was never measured; then everything else. Ties by
+        drawdown, then trades. Returns the ``Ranking`` message: ``rows`` and
+        ``notes``."""
+        request = research.RankRequest()
+        if rule is not None:
+            request.rule = rule
+        if instrument is not None:
+            request.instrument = instrument
+        return self._call(self._stub.RankFindings, request)
+
     def instruments(self) -> list[Instrument]:
         """Instruments with bars in the library, by interval and date range."""
         reply = self._call(self._stub.ListInstruments, pb.Empty())
