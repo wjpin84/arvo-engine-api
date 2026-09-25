@@ -3,7 +3,11 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
+## 0.4.0 (2026-09-25)
+
+A minor bump, additive: one call and its two messages. An older engine
+answers `Unimplemented` to the leaderboard; a client built against 0.3.0
+never asks.
 
 - **`Research.RankFindings`**, with `RankRequest`, `Ranking` and
   `RankingRowView` (#226): the leaderboard, every comparable finding in the
