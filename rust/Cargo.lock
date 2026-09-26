@@ -19,7 +19,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "arvo-api"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "prost",
  "serde",
@@ -27,7 +27,7 @@ dependencies = [
 
 [[package]]
 name = "arvo-client"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "arvo-api",
  "prost",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "generate"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "prost-build",
  "protoc-bin-vendored",
