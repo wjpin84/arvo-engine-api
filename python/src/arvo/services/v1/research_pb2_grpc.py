@@ -118,6 +118,11 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.PanelView.FromString,
                 _registered_method=True)
+        self.RunPanel = channel.unary_unary(
+                '/arvo.services.v1.Research/RunPanel',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.PanelRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.PanelView.FromString,
+                _registered_method=True)
         self.ViewBook = channel.unary_unary(
                 '/arvo.services.v1.Research/ViewBook',
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BookRequest.SerializeToString,
@@ -291,6 +296,14 @@ class ResearchServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RunPanel(self, request, context):
+        """A panel over one of the project's universes (#227), under a rule or the
+        default, recorded as a finding that names the universe and its reason.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ViewBook(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -454,6 +467,11 @@ def add_ResearchServicer_to_server(servicer, server):
             'ViewPanel': grpc.unary_unary_rpc_method_handler(
                     servicer.ViewPanel,
                     request_deserializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.PanelView.SerializeToString,
+            ),
+            'RunPanel': grpc.unary_unary_rpc_method_handler(
+                    servicer.RunPanel,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.PanelRequest.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.PanelView.SerializeToString,
             ),
             'ViewBook': grpc.unary_unary_rpc_method_handler(
@@ -948,6 +966,33 @@ class Research(object):
             target,
             '/arvo.services.v1.Research/ViewPanel',
             arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.PanelView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RunPanel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/RunPanel',
+            arvo_dot_research_dot_v1_dot_models__pb2.PanelRequest.SerializeToString,
             arvo_dot_research_dot_v1_dot_views__pb2.PanelView.FromString,
             options,
             channel_credentials,

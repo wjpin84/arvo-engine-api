@@ -3,6 +3,12 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+- **`Research.RunPanel`** with `PanelRequest` (#227): a panel over one of the
+  project's universes, under a rule or the default. `PanelView` gains
+  `universe` and `notes`. Additive.
+
 ## 0.4.0 (2026-09-25)
 
 A minor bump, additive: one call and its two messages. An older engine

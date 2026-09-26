@@ -167,6 +167,13 @@ message BookRequest {
   optional uint32 max_per_sector = 4;
 }
 
+// A panel over a universe (#227): a file under the project's universes/.
+message PanelRequest {
+  string universe = 1;
+  // The default rule when absent.
+  optional string strategy = 2;
+}
+
 message SharedExperiment {
   // The file's text, as the person pasted or opened it.
   string text = 1;

@@ -240,6 +240,16 @@ pub struct BookRequest {
     #[prost(uint32, optional, tag = "4")]
     pub max_per_sector: ::core::option::Option<u32>,
 }
+/// A panel over a universe (#227): a file under the project's universes/.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PanelRequest {
+    #[prost(string, tag = "1")]
+    pub universe: ::prost::alloc::string::String,
+    /// The default rule when absent.
+    #[prost(string, optional, tag = "2")]
+    pub strategy: ::core::option::Option<::prost::alloc::string::String>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SharedExperiment {
@@ -998,6 +1008,13 @@ pub struct PanelView {
     pub slippage_bps: f64,
     #[prost(string, tag = "27")]
     pub engine: ::prost::alloc::string::String,
+    /// The universe this panel ran over (#227); empty for the whole library.
+    #[prost(string, tag = "28")]
+    pub universe: ::prost::alloc::string::String,
+    /// What to keep in mind about it: the reason it was chosen, its size as a
+    /// search, that membership is today's, members left out for want of data.
+    #[prost(string, repeated, tag = "29")]
+    pub notes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 /// One thing to do about a finding, flattened for display.
 #[derive(serde::Serialize, serde::Deserialize)]

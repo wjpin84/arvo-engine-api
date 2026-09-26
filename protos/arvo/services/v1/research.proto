@@ -37,6 +37,9 @@ service Research {
   rpc ViewStudy(arvo.research.v1.StudyRequest) returns (arvo.research.v1.StudyView);
   rpc ViewWalkForward(arvo.research.v1.StudyRequest) returns (arvo.research.v1.WalkForwardView);
   rpc ViewPanel(arvo.common.v1.Empty) returns (arvo.research.v1.PanelView);
+  // A panel over one of the project's universes (#227), under a rule or the
+  // default, recorded as a finding that names the universe and its reason.
+  rpc RunPanel(arvo.research.v1.PanelRequest) returns (arvo.research.v1.PanelView);
   rpc ViewBook(arvo.research.v1.BookRequest) returns (arvo.research.v1.StudyView);
   rpc ViewHistory(arvo.common.v1.Empty) returns (arvo.research.v1.HistoryView);
   rpc ViewRecord(arvo.research.v1.FindingId) returns (arvo.research.v1.RecordView);

@@ -330,6 +330,11 @@ message PanelView {
   double commission_bps = 25;
   double slippage_bps = 26;
   string engine = 27;
+  // The universe this panel ran over (#227); empty for the whole library.
+  string universe = 28;
+  // What to keep in mind about it: the reason it was chosen, its size as a
+  // search, that membership is today's, members left out for want of data.
+  repeated string notes = 29;
 }
 
 // One thing to do about a finding, flattened for display.

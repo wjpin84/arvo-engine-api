@@ -241,6 +241,16 @@ class Engine:
             request.instrument = instrument
         return self._call(self._stub.RankFindings, request)
 
+    def run_panel(self, universe: str, *, strategy: str | None = None) -> Any:
+        """A panel over one of the project's universes (#227): one rule, one
+        parameter set, every member at once. Returns the ``PanelView``
+        message; its ``universe`` and ``notes`` say what was run and what to
+        keep in mind."""
+        request = research.PanelRequest(universe=universe)
+        if strategy is not None:
+            request.strategy = strategy
+        return self._call(self._stub.RunPanel, request)
+
     def instruments(self) -> list[Instrument]:
         """Instruments with bars in the library, by interval and date range."""
         reply = self._call(self._stub.ListInstruments, pb.Empty())

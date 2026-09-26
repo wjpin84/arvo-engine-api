@@ -3059,6 +3059,32 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "ViewPanel"));
             self.inner.unary(req, path, codec).await
         }
+        /// A panel over one of the project's universes (#227), under a rule or the
+        /// default, recorded as a finding that names the universe and its reason.
+        pub async fn run_panel(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::PanelRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::PanelView>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/RunPanel",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "RunPanel"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn view_book(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::research::BookRequest>,
@@ -3492,6 +3518,15 @@ pub mod research_server {
         async fn view_panel(
             &self,
             request: tonic::Request<::arvo_api::common::Empty>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::PanelView>,
+            tonic::Status,
+        >;
+        /// A panel over one of the project's universes (#227), under a rule or the
+        /// default, recorded as a finding that names the universe and its reason.
+        async fn run_panel(
+            &self,
+            request: tonic::Request<::arvo_api::research::PanelRequest>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::PanelView>,
             tonic::Status,
@@ -4378,6 +4413,51 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ViewPanelSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/RunPanel" => {
+                    #[allow(non_camel_case_types)]
+                    struct RunPanelSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::PanelRequest>
+                    for RunPanelSvc<T> {
+                        type Response = ::arvo_api::research::PanelView;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::PanelRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::run_panel(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = RunPanelSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
