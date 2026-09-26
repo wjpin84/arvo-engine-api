@@ -8,6 +8,9 @@ bump named on each release follows [VERSIONING.md](VERSIONING.md).
 - **`Research.ListRuleFiles`** and **`Research.WriteRule`**, with `RuleFile`,
   `RuleFiles` and `RuleText` (#225): the project's rules written as data, and
   writing one. Additive.
+- **`ReviewView.json`** (#229): the day's review as JSON, so a chart can draw
+  the fills against their decision prices, the refusals and the frozen
+  stretches. Additive, and the review gains `refusals` and `spans`.
 - **`Research.TranslatePine`**, with `PineScript` and `PineTranslation`
   (#228): a Pine v5 strategy translated into a rule, with every construct it
   cannot say named. It writes nothing; the rule it returns goes to

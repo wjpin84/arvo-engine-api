@@ -1633,6 +1633,11 @@ pub struct ReviewView {
     /// Whether this call wrote it, or read one written before.
     #[prost(bool, tag = "4")]
     pub written_now: bool,
+    /// The same review as JSON (#229): every session's fills with the price
+    /// each was decided at, its round trips, its refusals with their times, and
+    /// the stretches it was frozen or halted. What a chart of the day draws.
+    #[prost(string, tag = "5")]
+    pub json: ::prost::alloc::string::String,
 }
 /// One bar of the library, as the research tier reads it (#195).
 #[derive(serde::Serialize, serde::Deserialize)]
