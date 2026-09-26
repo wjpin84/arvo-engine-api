@@ -227,6 +227,18 @@ class Engine:
             for s in reply.strategies
         ]
 
+    def translate_pine(self, script: str, *, interval: str | None = None) -> Any:
+        """Translates a Pine v5 strategy into a rule (#228).
+
+        Writes nothing: read the ``rule`` it returns, then pass it to
+        :meth:`write_rule` to keep it. Every construct it cannot say is
+        named in the refusal, all of them at once.
+        """
+        request = research.PineScript(text=script)
+        if interval is not None:
+            request.interval = interval
+        return self._call(self._stub.TranslatePine, request)
+
     def rule_files(self) -> Any:
         """The project's rules written as data (#225), with any reason one
         cannot run. Returns the ``RuleFiles`` message."""

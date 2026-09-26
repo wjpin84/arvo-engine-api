@@ -8,6 +8,10 @@ bump named on each release follows [VERSIONING.md](VERSIONING.md).
 - **`Research.ListRuleFiles`** and **`Research.WriteRule`**, with `RuleFile`,
   `RuleFiles` and `RuleText` (#225): the project's rules written as data, and
   writing one. Additive.
+- **`Research.TranslatePine`**, with `PineScript` and `PineTranslation`
+  (#228): a Pine v5 strategy translated into a rule, with every construct it
+  cannot say named. It writes nothing; the rule it returns goes to
+  `WriteRule`. Additive.
 
 ## 0.5.0 (2026-09-26)
 
