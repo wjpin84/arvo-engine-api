@@ -2961,6 +2961,58 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "ListRules"));
             self.inner.unary(req, path, codec).await
         }
+        /// The project's rules written as data (#225), with any reason one cannot
+        /// run.
+        pub async fn list_rule_files(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RuleFiles>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/ListRuleFiles",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "ListRuleFiles"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Writes one, refusing anything the engine would not run. The picker
+        /// re-reads at once, so a ruleset written next may name it.
+        pub async fn write_rule(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::RuleText>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RuleFile>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/WriteRule",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "WriteRule"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn get_risk_model(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -3490,6 +3542,24 @@ pub mod research_server {
             request: tonic::Request<::arvo_api::common::Empty>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::Rules>,
+            tonic::Status,
+        >;
+        /// The project's rules written as data (#225), with any reason one cannot
+        /// run.
+        async fn list_rule_files(
+            &self,
+            request: tonic::Request<::arvo_api::common::Empty>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RuleFiles>,
+            tonic::Status,
+        >;
+        /// Writes one, refusing anything the engine would not run. The picker
+        /// re-reads at once, so a ruleset written next may name it.
+        async fn write_rule(
+            &self,
+            request: tonic::Request<::arvo_api::research::RuleText>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::RuleFile>,
             tonic::Status,
         >;
         async fn get_risk_model(
@@ -4233,6 +4303,96 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ListRulesSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/ListRuleFiles" => {
+                    #[allow(non_camel_case_types)]
+                    struct ListRuleFilesSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::common::Empty>
+                    for ListRuleFilesSvc<T> {
+                        type Response = ::arvo_api::research::RuleFiles;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::common::Empty>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::list_rule_files(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ListRuleFilesSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/WriteRule" => {
+                    #[allow(non_camel_case_types)]
+                    struct WriteRuleSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::RuleText>
+                    for WriteRuleSvc<T> {
+                        type Response = ::arvo_api::research::RuleFile;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::RuleText>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::write_rule(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = WriteRuleSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

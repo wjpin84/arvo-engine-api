@@ -98,6 +98,16 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.Rules.FromString,
                 _registered_method=True)
+        self.ListRuleFiles = channel.unary_unary(
+                '/arvo.services.v1.Research/ListRuleFiles',
+                request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFiles.FromString,
+                _registered_method=True)
+        self.WriteRule = channel.unary_unary(
+                '/arvo.services.v1.Research/WriteRule',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleText.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.FromString,
+                _registered_method=True)
         self.GetRiskModel = channel.unary_unary(
                 '/arvo.services.v1.Research/GetRiskModel',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -266,6 +276,22 @@ class ResearchServicer(object):
 
     def ListRules(self, request, context):
         """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListRuleFiles(self, request, context):
+        """The project's rules written as data (#225), with any reason one cannot
+        run.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def WriteRule(self, request, context):
+        """Writes one, refusing anything the engine would not run. The picker
+        re-reads at once, so a ruleset written next may name it.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -448,6 +474,16 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.ListRules,
                     request_deserializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.Rules.SerializeToString,
+            ),
+            'ListRuleFiles': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListRuleFiles,
+                    request_deserializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFiles.SerializeToString,
+            ),
+            'WriteRule': grpc.unary_unary_rpc_method_handler(
+                    servicer.WriteRule,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleText.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.SerializeToString,
             ),
             'GetRiskModel': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRiskModel,
@@ -859,6 +895,60 @@ class Research(object):
             '/arvo.services.v1.Research/ListRules',
             arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
             arvo_dot_research_dot_v1_dot_models__pb2.Rules.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListRuleFiles(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ListRuleFiles',
+            arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
+            arvo_dot_research_dot_v1_dot_models__pb2.RuleFiles.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def WriteRule(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/WriteRule',
+            arvo_dot_research_dot_v1_dot_models__pb2.RuleText.SerializeToString,
+            arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.FromString,
             options,
             channel_credentials,
             insecure,

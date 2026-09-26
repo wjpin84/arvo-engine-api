@@ -484,6 +484,57 @@ pub struct Rulesets {
     #[prost(message, repeated, tag = "1")]
     pub rulesets: ::prost::alloc::vec::Vec<Ruleset>,
 }
+/// One file under `<project>`/rules/: a rule written as data (#225), as the
+/// picker sees it.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RuleFile {
+    #[prost(string, tag = "1")]
+    pub path: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub label: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub premise: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub interval: ::prost::alloc::string::String,
+    /// The indicators it declares, by name.
+    #[prost(string, repeated, tag = "6")]
+    pub indicators: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// Defaults for the numbers a ruleset's grid may vary.
+    #[prost(message, repeated, tag = "7")]
+    pub params: ::prost::alloc::vec::Vec<Fixed>,
+    /// The entry and exit conditions, read back as a sentence.
+    #[prost(string, tag = "8")]
+    pub entry: ::prost::alloc::string::String,
+    #[prost(string, tag = "9")]
+    pub exit: ::prost::alloc::string::String,
+    /// The definition's content hash: what a finding on it is stamped with.
+    #[prost(string, tag = "10")]
+    pub version: ::prost::alloc::string::String,
+    /// Why it cannot run, when it cannot. The rest of the fields are then empty.
+    #[prost(string, optional, tag = "11")]
+    pub problem: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RuleFiles {
+    #[prost(message, repeated, tag = "1")]
+    pub rules: ::prost::alloc::vec::Vec<RuleFile>,
+}
+/// A rule as data (#225), as written: indicators by their TA-Lib names and
+/// conditions in JSON Logic. The engine parses and checks it, so this carries
+/// the file's text rather than a message per operator — a condition is a tree
+/// of arbitrary depth and the protos would be a second grammar to keep in
+/// step with the first.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RuleText {
+    /// The definition's JSON, as a person or an agent wrote it.
+    #[prost(string, tag = "1")]
+    pub json: ::prost::alloc::string::String,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RulesetPath {

@@ -325,6 +325,41 @@ message Rulesets {
   repeated Ruleset rulesets = 1;
 }
 
+// One file under `<project>`/rules/: a rule written as data (#225), as the
+// picker sees it.
+message RuleFile {
+  string path = 1;
+  string name = 2;
+  string label = 3;
+  string premise = 4;
+  string interval = 5;
+  // The indicators it declares, by name.
+  repeated string indicators = 6;
+  // Defaults for the numbers a ruleset's grid may vary.
+  repeated Fixed params = 7;
+  // The entry and exit conditions, read back as a sentence.
+  string entry = 8;
+  string exit = 9;
+  // The definition's content hash: what a finding on it is stamped with.
+  string version = 10;
+  // Why it cannot run, when it cannot. The rest of the fields are then empty.
+  optional string problem = 11;
+}
+
+message RuleFiles {
+  repeated RuleFile rules = 1;
+}
+
+// A rule as data (#225), as written: indicators by their TA-Lib names and
+// conditions in JSON Logic. The engine parses and checks it, so this carries
+// the file's text rather than a message per operator — a condition is a tree
+// of arbitrary depth and the protos would be a second grammar to keep in
+// step with the first.
+message RuleText {
+  // The definition's JSON, as a person or an agent wrote it.
+  string json = 1;
+}
+
 message RulesetPath {
   string path = 1;
 }

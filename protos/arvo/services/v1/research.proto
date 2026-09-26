@@ -31,6 +31,12 @@ service Research {
   rpc ReadRuleset(arvo.research.v1.RulesetPath) returns (arvo.research.v1.RulesetForm);
   rpc WriteRuleset(arvo.research.v1.RulesetForm) returns (arvo.research.v1.Ruleset);
   rpc ListRules(arvo.common.v1.Empty) returns (arvo.research.v1.Rules);
+  // The project's rules written as data (#225), with any reason one cannot
+  // run.
+  rpc ListRuleFiles(arvo.common.v1.Empty) returns (arvo.research.v1.RuleFiles);
+  // Writes one, refusing anything the engine would not run. The picker
+  // re-reads at once, so a ruleset written next may name it.
+  rpc WriteRule(arvo.research.v1.RuleText) returns (arvo.research.v1.RuleFile);
   rpc GetRiskModel(arvo.common.v1.Empty) returns (arvo.research.v1.RiskModel);
   // The workbench's own views (#127 stage 2): what the window renders, from
   // the same runs an agent's RunStudy performs.

@@ -3,6 +3,12 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+- **`Research.ListRuleFiles`** and **`Research.WriteRule`**, with `RuleFile`,
+  `RuleFiles` and `RuleText` (#225): the project's rules written as data, and
+  writing one. Additive.
+
 ## 0.5.0 (2026-09-26)
 
 A minor bump, additive: one call, one message, two fields. An older engine

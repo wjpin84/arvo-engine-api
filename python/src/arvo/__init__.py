@@ -227,6 +227,21 @@ class Engine:
             for s in reply.strategies
         ]
 
+    def rule_files(self) -> Any:
+        """The project's rules written as data (#225), with any reason one
+        cannot run. Returns the ``RuleFiles`` message."""
+        return self._call(self._stub.ListRuleFiles, pb.Empty())
+
+    def write_rule(self, rule: dict[str, Any] | str) -> Any:
+        """Writes a rule as data (#225): a definition object, or its JSON.
+
+        The engine parses and checks it, so a definition it could not
+        evaluate is refused with the construct named and nothing is written.
+        Returns the ``RuleFile`` message.
+        """
+        text = rule if isinstance(rule, str) else json.dumps(rule)
+        return self._call(self._stub.WriteRule, research.RuleText(json=text))
+
     def rank_findings(self, *, rule: str | None = None, instrument: str | None = None) -> Any:
         """The leaderboard (#226): every comparable finding in the one order
         Arvo ranks by. Supported under the conservative cost tier first, by
