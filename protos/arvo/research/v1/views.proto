@@ -692,6 +692,10 @@ message ReviewView {
   string path = 3;
   // Whether this call wrote it, or read one written before.
   bool written_now = 4;
+  // The same review as JSON (#229): every session's fills with the price
+  // each was decided at, its round trips, its refusals with their times, and
+  // the stretches it was frozen or halted. What a chart of the day draws.
+  string json = 5;
 }
 
 // One bar of the library, as the research tier reads it (#195).

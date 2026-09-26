@@ -523,6 +523,38 @@ pub struct RuleFiles {
     #[prost(message, repeated, tag = "1")]
     pub rules: ::prost::alloc::vec::Vec<RuleFile>,
 }
+/// A Pine v5 strategy to read as a rule (#228).
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PineScript {
+    /// The script's text, as pasted or opened.
+    #[prost(string, tag = "1")]
+    pub text: ::prost::alloc::string::String,
+    /// The resolution the rule will run at: Pine takes it from the chart, so
+    /// it is not in the script. "1day" when absent.
+    #[prost(string, optional, tag = "2")]
+    pub interval: ::core::option::Option<::prost::alloc::string::String>,
+}
+/// What a script became (#228). Nothing is written: pass `rule` to WriteRule
+/// to keep it, so reading a script and keeping it stay separate decisions.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PineTranslation {
+    /// The rule it describes, as JSON: the shape WriteRule takes.
+    #[prost(string, tag = "1")]
+    pub rule: ::prost::alloc::string::String,
+    /// Lines read and set aside because they change nothing the rule trades,
+    /// each with why. Never silently dropped.
+    #[prost(string, repeated, tag = "2")]
+    pub ignored: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// The rule's name and what it reads, for a person who will not read JSON.
+    #[prost(string, tag = "3")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub entry: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub exit: ::prost::alloc::string::String,
+}
 /// A rule as data (#225), as written: indicators by their TA-Lib names and
 /// conditions in JSON Logic. The engine parses and checks it, so this carries
 /// the file's text rather than a message per operator — a condition is a tree
@@ -1601,6 +1633,11 @@ pub struct ReviewView {
     /// Whether this call wrote it, or read one written before.
     #[prost(bool, tag = "4")]
     pub written_now: bool,
+    /// The same review as JSON (#229): every session's fills with the price
+    /// each was decided at, its round trips, its refusals with their times, and
+    /// the stretches it was frozen or halted. What a chart of the day draws.
+    #[prost(string, tag = "5")]
+    pub json: ::prost::alloc::string::String,
 }
 /// One bar of the library, as the research tier reads it (#195).
 #[derive(serde::Serialize, serde::Deserialize)]

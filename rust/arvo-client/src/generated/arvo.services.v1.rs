@@ -3013,6 +3013,33 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "WriteRule"));
             self.inner.unary(req, path, codec).await
         }
+        /// Translates a Pine v5 strategy into a rule (#228), refusing every
+        /// construct it cannot say by name. Nothing is fetched, run or written:
+        /// the rule it returns goes to WriteRule to be kept.
+        pub async fn translate_pine(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::PineScript>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::PineTranslation>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/TranslatePine",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "TranslatePine"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn get_risk_model(
             &mut self,
             request: impl tonic::IntoRequest<::arvo_api::common::Empty>,
@@ -3560,6 +3587,16 @@ pub mod research_server {
             request: tonic::Request<::arvo_api::research::RuleText>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::RuleFile>,
+            tonic::Status,
+        >;
+        /// Translates a Pine v5 strategy into a rule (#228), refusing every
+        /// construct it cannot say by name. Nothing is fetched, run or written:
+        /// the rule it returns goes to WriteRule to be kept.
+        async fn translate_pine(
+            &self,
+            request: tonic::Request<::arvo_api::research::PineScript>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::PineTranslation>,
             tonic::Status,
         >;
         async fn get_risk_model(
@@ -4393,6 +4430,51 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = WriteRuleSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/TranslatePine" => {
+                    #[allow(non_camel_case_types)]
+                    struct TranslatePineSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::PineScript>
+                    for TranslatePineSvc<T> {
+                        type Response = ::arvo_api::research::PineTranslation;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::PineScript>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::translate_pine(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = TranslatePineSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

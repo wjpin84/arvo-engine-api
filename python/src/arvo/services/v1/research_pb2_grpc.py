@@ -108,6 +108,11 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleText.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.FromString,
                 _registered_method=True)
+        self.TranslatePine = channel.unary_unary(
+                '/arvo.services.v1.Research/TranslatePine',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.PineScript.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.PineTranslation.FromString,
+                _registered_method=True)
         self.GetRiskModel = channel.unary_unary(
                 '/arvo.services.v1.Research/GetRiskModel',
                 request_serializer=arvo_dot_common_dot_v1_dot_models__pb2.Empty.SerializeToString,
@@ -291,6 +296,15 @@ class ResearchServicer(object):
     def WriteRule(self, request, context):
         """Writes one, refusing anything the engine would not run. The picker
         re-reads at once, so a ruleset written next may name it.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def TranslatePine(self, request, context):
+        """Translates a Pine v5 strategy into a rule (#228), refusing every
+        construct it cannot say by name. Nothing is fetched, run or written:
+        the rule it returns goes to WriteRule to be kept.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -484,6 +498,11 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.WriteRule,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleText.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.SerializeToString,
+            ),
+            'TranslatePine': grpc.unary_unary_rpc_method_handler(
+                    servicer.TranslatePine,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.PineScript.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.PineTranslation.SerializeToString,
             ),
             'GetRiskModel': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRiskModel,
@@ -949,6 +968,33 @@ class Research(object):
             '/arvo.services.v1.Research/WriteRule',
             arvo_dot_research_dot_v1_dot_models__pb2.RuleText.SerializeToString,
             arvo_dot_research_dot_v1_dot_models__pb2.RuleFile.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TranslatePine(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/TranslatePine',
+            arvo_dot_research_dot_v1_dot_models__pb2.PineScript.SerializeToString,
+            arvo_dot_research_dot_v1_dot_models__pb2.PineTranslation.FromString,
             options,
             channel_credentials,
             insecure,
