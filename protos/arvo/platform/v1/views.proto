@@ -191,7 +191,16 @@ message EventKindView {
     StreamEvent stream = 3;
     FindingsEvent findings = 4;
     SessionEvent session = 5;
+    LibraryEvent library = 6;
   }
+}
+
+// The data library changed: a fetch wrote an instrument's bars. Carries the
+// content hash the library now reports for it, so a reader holding bars
+// under an older hash knows to drop them without asking.
+message LibraryEvent {
+  string instrument = 1;
+  string fingerprint = 2;
 }
 
 message PluginEvent {

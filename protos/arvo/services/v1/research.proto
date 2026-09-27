@@ -58,6 +58,14 @@ service Research {
   // The library's bars over a window, read-only (#195): what a study saw,
   // for an agent that can run but could not look. Nothing here fetches.
   rpc ReadBars(arvo.research.v1.BarsRequest) returns (arvo.research.v1.BarsView);
+  // The same window, whole: every bar between `from` and `to`, in messages
+  // of at most 2000 bars, oldest first. For a chart paging through history;
+  // `last` is ignored.
+  rpc StreamBars(arvo.research.v1.BarsRequest) returns (stream arvo.research.v1.BarsView);
+  // One indicator over a window of bars, computed the way a rule computes
+  // it, with the same warm-up: the curve starts at the first bar the
+  // indicator has a value for. Reads the library; reaches nothing.
+  rpc ReadIndicator(arvo.research.v1.IndicatorRequest) returns (arvo.research.v1.NamedCurveView);
   // The regime of each bar in the window, labelled after the fact.
   rpc ViewRegime(arvo.research.v1.BarsRequest) returns (arvo.research.v1.RegimeView);
   // The review after the close for a day (#217), written if it was not, read

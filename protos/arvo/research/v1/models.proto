@@ -136,8 +136,22 @@ message BarsRequest {
   optional string from = 3;
   optional string to = 4;
   // At most this many bars, from the end of the window. 60 when absent;
-  // never more than 2000.
+  // never more than 2000. `StreamBars` ignores it and answers the whole
+  // window in messages of at most 2000 bars.
   optional uint32 last = 5;
+}
+
+// One indicator over a window of bars, as a rule would declare it.
+//
+// The chart draws what a rule would see, so the declaration is the rule
+// language's own: the `indicators` entry of a rule file, as JSON, e.g.
+// `{"kind":"EMA","input":"close","period":20}` or
+// `{"kind":"MACD","fast":12,"slow":26,"signal":9,"line":"histogram"}`.
+// A period may name a parameter; `params` supplies it.
+message IndicatorRequest {
+  BarsRequest bars = 1;
+  string indicator = 2;
+  map<string, double> params = 3;
 }
 
 // The leaderboard's filter (#226). Empty is every finding.

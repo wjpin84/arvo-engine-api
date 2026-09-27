@@ -196,9 +196,27 @@ pub struct BarsRequest {
     #[prost(string, optional, tag = "4")]
     pub to: ::core::option::Option<::prost::alloc::string::String>,
     /// At most this many bars, from the end of the window. 60 when absent;
-    /// never more than 2000.
+    /// never more than 2000. `StreamBars` ignores it and answers the whole
+    /// window in messages of at most 2000 bars.
     #[prost(uint32, optional, tag = "5")]
     pub last: ::core::option::Option<u32>,
+}
+/// One indicator over a window of bars, as a rule would declare it.
+///
+/// The chart draws what a rule would see, so the declaration is the rule
+/// language's own: the `indicators` entry of a rule file, as JSON, e.g.
+/// `{"kind":"EMA","input":"close","period":20}` or
+/// `{"kind":"MACD","fast":12,"slow":26,"signal":9,"line":"histogram"}`.
+/// A period may name a parameter; `params` supplies it.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct IndicatorRequest {
+    #[prost(message, optional, tag = "1")]
+    pub bars: ::core::option::Option<BarsRequest>,
+    #[prost(string, tag = "2")]
+    pub indicator: ::prost::alloc::string::String,
+    #[prost(map = "string, double", tag = "3")]
+    pub params: ::std::collections::HashMap<::prost::alloc::string::String, f64>,
 }
 /// The leaderboard's filter (#226). Empty is every finding.
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -1640,6 +1658,11 @@ pub struct ReviewView {
     pub json: ::prost::alloc::string::String,
 }
 /// One bar of the library, as the research tier reads it (#195).
+///
+/// Times are UTC. `at` is the open as `YYYY-MM-DDTHH:MM:SS` with no zone, and
+/// `time` is the same instant as seconds since the epoch, which is what a chart
+/// keys by. A daily bar opens at 00:00 UTC of its date. To show the bar in
+/// exchange time, apply `BarsView.zone`.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BarView {
@@ -1656,6 +1679,10 @@ pub struct BarView {
     pub close: f64,
     #[prost(double, tag = "6")]
     pub volume: f64,
+    /// The open as seconds since the epoch, UTC. The same instant as `at`,
+    /// in the shape `CandlePoint.time` already has, so one decoder serves both.
+    #[prost(int64, tag = "7")]
+    pub time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1666,6 +1693,11 @@ pub struct BarsView {
     pub interval: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "3")]
     pub bars: ::prost::alloc::vec::Vec<BarView>,
+    /// The IANA zone the instrument's sessions are stated in, e.g.
+    /// `America/New_York`. Times on the bars stay UTC; this is what a chart
+    /// converts with to draw session boundaries and label the axis.
+    #[prost(string, tag = "4")]
+    pub zone: ::prost::alloc::string::String,
 }
 /// The regime each bar closed in: "trending up", "trending down" or
 /// "ranging", absent until the lookback has filled. Labelled after the fact
@@ -1698,6 +1730,8 @@ pub struct RegimeView {
     #[prost(map = "string, uint32", tag = "6")]
     pub shares: ::std::collections::HashMap<::prost::alloc::string::String, u32>,
 }
+/// One bar as a chart draws it: the open as seconds since the epoch, UTC,
+/// and the five numbers. The same bar as `BarView`, keyed by `time`.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct CandlePoint {
@@ -1711,6 +1745,10 @@ pub struct CandlePoint {
     pub low: f64,
     #[prost(double, tag = "5")]
     pub close: f64,
+    /// Absent (zero) in views recorded before it existed; a volume pane
+    /// treats zero as nothing to draw.
+    #[prost(double, tag = "6")]
+    pub volume: f64,
 }
 /// One instrument's bars with its own trades marked on them.
 ///

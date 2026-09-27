@@ -168,6 +168,16 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
                 _registered_method=True)
+        self.StreamBars = channel.unary_stream(
+                '/arvo.services.v1.Research/StreamBars',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
+                _registered_method=True)
+        self.ReadIndicator = channel.unary_unary(
+                '/arvo.services.v1.Research/ReadIndicator',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.IndicatorRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_views__pb2.NamedCurveView.FromString,
+                _registered_method=True)
         self.ViewRegime = channel.unary_unary(
                 '/arvo.services.v1.Research/ViewRegime',
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
@@ -382,6 +392,24 @@ class ResearchServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def StreamBars(self, request, context):
+        """The same window, whole: every bar between `from` and `to`, in messages
+        of at most 2000 bars, oldest first. For a chart paging through history;
+        `last` is ignored.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ReadIndicator(self, request, context):
+        """One indicator over a window of bars, computed the way a rule computes
+        it, with the same warm-up: the curve starts at the first bar the
+        indicator has a value for. Reads the library; reaches nothing.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ViewRegime(self, request, context):
         """The regime of each bar in the window, labelled after the fact.
         """
@@ -558,6 +586,16 @@ def add_ResearchServicer_to_server(servicer, server):
                     servicer.ReadBars,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.SerializeToString,
+            ),
+            'StreamBars': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamBars,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.BarsView.SerializeToString,
+            ),
+            'ReadIndicator': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReadIndicator,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.IndicatorRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_views__pb2.NamedCurveView.SerializeToString,
             ),
             'ViewRegime': grpc.unary_unary_rpc_method_handler(
                     servicer.ViewRegime,
@@ -1292,6 +1330,60 @@ class Research(object):
             '/arvo.services.v1.Research/ReadBars',
             arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
             arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamBars(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/arvo.services.v1.Research/StreamBars',
+            arvo_dot_research_dot_v1_dot_models__pb2.BarsRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.BarsView.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReadIndicator(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ReadIndicator',
+            arvo_dot_research_dot_v1_dot_models__pb2.IndicatorRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_views__pb2.NamedCurveView.FromString,
             options,
             channel_credentials,
             insecure,

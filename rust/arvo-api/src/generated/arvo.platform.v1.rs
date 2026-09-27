@@ -336,7 +336,7 @@ pub struct EventView {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EventKindView {
-    #[prost(oneof = "event_kind_view::Of", tags = "1, 2, 3, 4, 5")]
+    #[prost(oneof = "event_kind_view::Of", tags = "1, 2, 3, 4, 5, 6")]
     pub of: ::core::option::Option<event_kind_view::Of>,
 }
 /// Nested message and enum types in `EventKindView`.
@@ -354,7 +354,20 @@ pub mod event_kind_view {
         Findings(super::FindingsEvent),
         #[prost(message, tag = "5")]
         Session(super::SessionEvent),
+        #[prost(message, tag = "6")]
+        Library(super::LibraryEvent),
     }
+}
+/// The data library changed: a fetch wrote an instrument's bars. Carries the
+/// content hash the library now reports for it, so a reader holding bars
+/// under an older hash knows to drop them without asking.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct LibraryEvent {
+    #[prost(string, tag = "1")]
+    pub instrument: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub fingerprint: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

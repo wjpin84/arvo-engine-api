@@ -70,8 +70,8 @@ mod ergonomics {
     use super::{
         platform::{event_kind_view, plugin_status_view},
         research::record_view,
-        EventKindView, EventView, FeedEvent, FindingsEvent, PluginEvent, SessionEvent, SeverityView,
-        StreamEvent,
+        EventKindView, EventView, FeedEvent, FindingsEvent, LibraryEvent, PluginEvent, SessionEvent,
+        SeverityView, StreamEvent,
         BookView, ImportView, MetricsView, PanelView, PluginStatusView, PluginStatusViewReachable,
         PluginStatusViewUnreachable, PluginView, PortfolioView, RecordView, ReportedView, StudyView,
         TradesView, WalkForwardView,
@@ -190,6 +190,12 @@ mod ergonomics {
         #[must_use]
         pub fn session(id: String, state: String) -> Self {
             Self { of: Some(event_kind_view::Of::Session(SessionEvent { id, state })) }
+        }
+
+        /// A fetch wrote an instrument's bars.
+        #[must_use]
+        pub fn library(instrument: String, fingerprint: String) -> Self {
+            Self { of: Some(event_kind_view::Of::Library(LibraryEvent { instrument, fingerprint })) }
         }
     }
 
