@@ -6,10 +6,25 @@ and carry the same number. A git tag `vX.Y.Z` on this repository is a
 release of all of it at once, so a reader in any language can say "engine
 API 0.3" and mean one thing.
 
-The version lives in two places, bumped together:
+The version lives in three places, bumped together:
 
 - `rust/Cargo.toml`, under `[workspace.package]`
 - `python/pyproject.toml`, under `[project]`
+- `rust/arvo-client/Cargo.toml`, the **exact** pin on `arvo-api`
+  (`version = "=X.Y.Z"`)
+
+The third one is easy to miss and does not fail quietly: `arvo-client` requires
+the *same* version of `arvo-api`, not a compatible one, because the two are
+generated from one set of protos and a mismatched pair would compile while
+disagreeing about the wire. Leaving it behind makes `cargo` refuse to resolve
+the workspace at all —
+
+```
+error: failed to select a version for the requirement `arvo-api = "=0.5.0"`
+candidate versions found which didn't match: 0.6.0
+```
+
+— which is the good failure, and is how this line came to be documented.
 
 ## Which part moves
 
