@@ -5,6 +5,18 @@ bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
 ## Unreleased
 
+## 0.6.0 (2026-09-27)
+
+A minor bump, additive throughout: three calls, five messages, and one field on
+an existing message. No field number changed and nothing was removed, so an
+existing client keeps working and an older engine answers `Unimplemented` to the
+three new calls.
+
+`ReviewView.refusals` and `ReviewView.spans` below are inside that one new
+`json` field rather than proto fields of their own, which is why the review's
+shape can grow without a bump: what a chart reads is JSON, and a reader that
+does not know a key ignores it.
+
 - **`Research.ListRuleFiles`** and **`Research.WriteRule`**, with `RuleFile`,
   `RuleFiles` and `RuleText` (#225): the project's rules written as data, and
   writing one. Additive.
