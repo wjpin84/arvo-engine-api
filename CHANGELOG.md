@@ -3,14 +3,13 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
-
 ## 0.6.0 (2026-09-27)
 
-A minor bump, additive throughout: three calls, five messages, and one field on
-an existing message. No field number changed and nothing was removed, so an
-existing client keeps working and an older engine answers `Unimplemented` to the
-three new calls.
+A minor bump, additive throughout: five calls, seven messages, four fields on
+existing messages, and one event kind. No field number changed and nothing was
+removed, so an existing client keeps working and an older engine answers
+`Unimplemented` to the new calls. The last five entries are what a chart needs
+from the engine and nothing else (arvo-finance-chart).
 
 `ReviewView.refusals` and `ReviewView.spans` below are inside that one new
 `json` field rather than proto fields of their own, which is why the review's
@@ -27,6 +26,22 @@ does not know a key ignores it.
   (#228): a Pine v5 strategy translated into a rule, with every construct it
   cannot say named. It writes nothing; the rule it returns goes to
   `WriteRule`. Additive.
+- **`CandlePoint.volume`** and **`BarView.time`** (arvo-engine-api #3): one
+  bar shape. A chart keys by `time` and draws volume from either message
+  without a second decoder. `BarView.time` is the same instant as `at`, UTC,
+  as seconds since the epoch. Additive.
+- **`BarsView.zone`** (#5): the IANA zone the instrument's sessions are
+  stated in, `America/New_York` for US equities. Bar times stay UTC, which
+  the messages now say; the zone is what a chart converts with. Additive.
+- **`Research.StreamBars`** (#4): a window of the library whole, in messages
+  of at most 2000 bars, oldest first, for paging through history. `ReadBars`
+  and its cap are unchanged. Additive.
+- **`Research.ReadIndicator`** with **`IndicatorRequest`** (#6): one
+  indicator over a window of bars, declared as a rule declares it and
+  computed by the same code with the same warm-up, answered as a
+  `NamedCurveView`. Additive.
+- **`LibraryEvent`** on `EventKindView` (#7): a fetch wrote an instrument's
+  bars; carries the library's new content hash. Additive.
 
 ## 0.5.0 (2026-09-26)
 

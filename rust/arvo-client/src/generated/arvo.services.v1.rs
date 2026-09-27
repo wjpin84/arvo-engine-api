@@ -3310,6 +3310,60 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "ReadBars"));
             self.inner.unary(req, path, codec).await
         }
+        /// The same window, whole: every bar between `from` and `to`, in messages
+        /// of at most 2000 bars, oldest first. For a chart paging through history;
+        /// `last` is ignored.
+        pub async fn stream_bars(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<::arvo_api::research::BarsView>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/StreamBars",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "StreamBars"));
+            self.inner.server_streaming(req, path, codec).await
+        }
+        /// One indicator over a window of bars, computed the way a rule computes
+        /// it, with the same warm-up: the curve starts at the first bar the
+        /// indicator has a value for. Reads the library; reaches nothing.
+        pub async fn read_indicator(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::IndicatorRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::NamedCurveView>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/ReadIndicator",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "ReadIndicator"));
+            self.inner.unary(req, path, codec).await
+        }
         /// The regime of each bar in the window, labelled after the fact.
         pub async fn view_regime(
             &mut self,
@@ -3680,6 +3734,29 @@ pub mod research_server {
             request: tonic::Request<::arvo_api::research::BarsRequest>,
         ) -> std::result::Result<
             tonic::Response<::arvo_api::research::BarsView>,
+            tonic::Status,
+        >;
+        /// Server streaming response type for the StreamBars method.
+        type StreamBarsStream: tonic::codegen::tokio_stream::Stream<
+                Item = std::result::Result<::arvo_api::research::BarsView, tonic::Status>,
+            >
+            + std::marker::Send
+            + 'static;
+        /// The same window, whole: every bar between `from` and `to`, in messages
+        /// of at most 2000 bars, oldest first. For a chart paging through history;
+        /// `last` is ignored.
+        async fn stream_bars(
+            &self,
+            request: tonic::Request<::arvo_api::research::BarsRequest>,
+        ) -> std::result::Result<tonic::Response<Self::StreamBarsStream>, tonic::Status>;
+        /// One indicator over a window of bars, computed the way a rule computes
+        /// it, with the same warm-up: the curve starts at the first bar the
+        /// indicator has a value for. Reads the library; reaches nothing.
+        async fn read_indicator(
+            &self,
+            request: tonic::Request<::arvo_api::research::IndicatorRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::NamedCurveView>,
             tonic::Status,
         >;
         /// The regime of each bar in the window, labelled after the fact.
@@ -4970,6 +5047,100 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ReadBarsSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/StreamBars" => {
+                    #[allow(non_camel_case_types)]
+                    struct StreamBarsSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::ServerStreamingService<
+                        ::arvo_api::research::BarsRequest,
+                    > for StreamBarsSvc<T> {
+                        type Response = ::arvo_api::research::BarsView;
+                        type ResponseStream = T::StreamBarsStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::BarsRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::stream_bars(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = StreamBarsSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/ReadIndicator" => {
+                    #[allow(non_camel_case_types)]
+                    struct ReadIndicatorSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::IndicatorRequest>
+                    for ReadIndicatorSvc<T> {
+                        type Response = ::arvo_api::research::NamedCurveView;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                ::arvo_api::research::IndicatorRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::read_indicator(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ReadIndicatorSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

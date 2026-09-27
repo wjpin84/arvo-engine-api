@@ -699,6 +699,11 @@ message ReviewView {
 }
 
 // One bar of the library, as the research tier reads it (#195).
+//
+// Times are UTC. `at` is the open as `YYYY-MM-DDTHH:MM:SS` with no zone, and
+// `time` is the same instant as seconds since the epoch, which is what a chart
+// keys by. A daily bar opens at 00:00 UTC of its date. To show the bar in
+// exchange time, apply `BarsView.zone`.
 message BarView {
   // When the bar opened.
   string at = 1;
@@ -707,12 +712,19 @@ message BarView {
   double low = 4;
   double close = 5;
   double volume = 6;
+  // The open as seconds since the epoch, UTC. The same instant as `at`,
+  // in the shape `CandlePoint.time` already has, so one decoder serves both.
+  int64 time = 7;
 }
 
 message BarsView {
   string instrument = 1;
   string interval = 2;
   repeated BarView bars = 3;
+  // The IANA zone the instrument's sessions are stated in, e.g.
+  // `America/New_York`. Times on the bars stay UTC; this is what a chart
+  // converts with to draw session boundaries and label the axis.
+  string zone = 4;
 }
 
 // The regime each bar closed in: "trending up", "trending down" or
@@ -736,12 +748,17 @@ message RegimeView {
   map<string, uint32> shares = 6;
 }
 
+// One bar as a chart draws it: the open as seconds since the epoch, UTC,
+// and the five numbers. The same bar as `BarView`, keyed by `time`.
 message CandlePoint {
   int64 time = 1;
   double open = 2;
   double high = 3;
   double low = 4;
   double close = 5;
+  // Absent (zero) in views recorded before it existed; a volume pane
+  // treats zero as nothing to draw.
+  double volume = 6;
 }
 
 // One instrument's bars with its own trades marked on them.
