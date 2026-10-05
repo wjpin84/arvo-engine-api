@@ -35,6 +35,9 @@ without one was the hole this closes.
   unfinished and lists it, with why in `last_error`, until it is started
   again. A state is a string, so nothing changes on the wire; a client that
   switches on the state should treat it as it treats `failed`.
+- **`PromotionView.paper_days` counts days with bars** (arvo-engine#36): the
+  days the paper session took a bar on, not the calendar days from its first
+  start to its last line. A comment; nothing changes on the wire.
 
 ## 0.6.0 (2026-09-27)
 
