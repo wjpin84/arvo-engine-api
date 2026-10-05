@@ -131,6 +131,18 @@ class Advice:
 
 
 @dataclass(frozen=True)
+class DataFinding:
+    """Something wrong with the bars a finding was produced from."""
+
+    severity: str
+    """``fault`` for what cannot be true of a price series, ``suspect`` for
+    what is merely unusual."""
+    kind: str
+    at: str
+    detail: str
+
+
+@dataclass(frozen=True)
 class Attachment:
     """One file kept with a finding: bytes stored once by content hash."""
 
@@ -161,6 +173,9 @@ class Finding:
     a study, ``combined`` for a walk-forward, ``pooled`` for a panel."""
     attachments: list[Attachment] = field(default_factory=list)
     """Files kept with it, in the order they were attached."""
+    data_findings: list[DataFinding] = field(default_factory=list)
+    """What is wrong with the bars it was produced from. A verdict is only as
+    good as the series under it: read these with it."""
 
 
 def default_root() -> Path:
@@ -211,9 +226,12 @@ class Engine:
     def __exit__(self, *_: object) -> None:
         self.close()
 
-    def _call(self, method: Any, request: Any) -> Any:
+    def _call(self, method: Any, request: Any, author: str | None = None) -> Any:
+        # Who is asking, for the engine's audit trail. A run says it in the
+        # request instead; see the contract's README.
+        named = (("arvo-author", author.strip()),) if author and author.strip() else ()
         try:
-            return method(request, metadata=self._metadata)
+            return method(request, metadata=self._metadata + named)
         except grpc.RpcError as err:
             code = err.code().name if hasattr(err, "code") else ""
             details = err.details() if hasattr(err, "details") else str(err)
@@ -227,7 +245,7 @@ class Engine:
             for s in reply.strategies
         ]
 
-    def translate_pine(self, script: str, *, interval: str | None = None) -> Any:
+    def translate_pine(self, script: str, *, interval: str | None = None, author: str | None = None) -> Any:
         """Translates a Pine v5 strategy into a rule (#228).
 
         Writes nothing: read the ``rule`` it returns, then pass it to
@@ -237,22 +255,23 @@ class Engine:
         request = research.PineScript(text=script)
         if interval is not None:
             request.interval = interval
-        return self._call(self._stub.TranslatePine, request)
+        return self._call(self._stub.TranslatePine, request, author)
 
     def rule_files(self) -> Any:
         """The project's rules written as data (#225), with any reason one
         cannot run. Returns the ``RuleFiles`` message."""
         return self._call(self._stub.ListRuleFiles, pb.Empty())
 
-    def write_rule(self, rule: dict[str, Any] | str) -> Any:
+    def write_rule(self, rule: dict[str, Any] | str, *, author: str | None = None) -> Any:
         """Writes a rule as data (#225): a definition object, or its JSON.
 
         The engine parses and checks it, so a definition it could not
         evaluate is refused with the construct named and nothing is written.
-        Returns the ``RuleFile`` message.
+        ``author`` is who is writing it, for the audit trail. Returns the
+        ``RuleFile`` message.
         """
         text = rule if isinstance(rule, str) else json.dumps(rule)
-        return self._call(self._stub.WriteRule, research.RuleText(json=text))
+        return self._call(self._stub.WriteRule, research.RuleText(json=text), author)
 
     def rank_findings(self, *, rule: str | None = None, instrument: str | None = None) -> Any:
         """The leaderboard (#226): every comparable finding in the one order
@@ -268,12 +287,13 @@ class Engine:
             request.instrument = instrument
         return self._call(self._stub.RankFindings, request)
 
-    def run_panel(self, universe: str, *, strategy: str | None = None) -> Any:
+    def run_panel(self, universe: str, *, author: str, strategy: str | None = None) -> Any:
         """A panel over one of the project's universes (#227): one rule, one
-        parameter set, every member at once. Returns the ``PanelView``
-        message; its ``universe`` and ``notes`` say what was run and what to
-        keep in mind."""
-        request = research.PanelRequest(universe=universe)
+        parameter set, every member at once. Saved as ``author``'s finding and
+        deflated against everything ``author`` has run, as a study is: a panel
+        is the widest search there is. Returns the ``PanelView`` message; its
+        ``universe`` and ``notes`` say what was run and what to keep in mind."""
+        request = research.PanelRequest(universe=universe, author=author, origin=_caller())
         if strategy is not None:
             request.strategy = strategy
         return self._call(self._stub.RunPanel, request)
@@ -516,4 +536,5 @@ def _finding(reply: Any) -> Finding:
         ruleset_hash=summary.ruleset_hash,
         detail=json.loads(reply.detail_json) if reply.detail_json else {},
         attachments=[_attachment(a) for a in reply.attachments],
+        data_findings=[DataFinding(d.severity, d.kind, d.at, d.detail) for d in reply.data_findings],
     )

@@ -3,6 +3,34 @@
 One entry per release, covering the protos and every binding of them. The
 bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+A minor bump when it is released. On the wire it is additive: three fields and
+one metadata key, and an older engine ignores all of them. **One binding
+breaks:** the Python `run_panel` now requires `author`, because a panel run
+without one was the hole this closes.
+
+- **`PanelRequest.author`** and **`PanelRequest.origin`** (#8): who is running
+  a panel, with the meaning they have on `RunRequest`. With an author the
+  panel is saved as that author's finding and deflated against everything the
+  author has run. Until now every panel was recorded as a person's, so an
+  agent or a script could run panels until one passed and nothing counted
+  them. Empty is a person at the window. Additive.
+- **`arvo-author` metadata** (#8): how a caller that is not a person names
+  itself on a call that records no finding, such as writing a rule or
+  translating a script. The engine's audit trail reads it. A field on those
+  requests was the alternative and was not taken: `RulesetForm` is also what
+  `ReadRuleset` answers with, and who is asking is not part of a ruleset.
+  `arvo_client::AUTHOR`, `request_as` and `author_of` in Rust; the `author=`
+  argument on `write_rule` and `translate_pine` in Python. Additive.
+- **`Finding.data_findings`** (#9): what is wrong with the bars a finding was
+  produced from, in the shape a window already shows beside a chart. An agent
+  or a script opening a finding had the verdict and no word about the series
+  under it. `Finding.data_findings` in Python, as `DataFinding`. Additive.
+- **Python `run_panel(universe, *, author, strategy=None)`**: `author` is
+  required. A script is never a person at the window. **Breaking for a script
+  that calls `run_panel` today.**
+
 ## 0.6.0 (2026-09-27)
 
 A minor bump, additive throughout: five calls, seven messages, four fields on

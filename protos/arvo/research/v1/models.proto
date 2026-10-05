@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package arvo.research.v1;
 
+// For what is wrong with the bars under a finding: one shape for it, whether
+// a window shows it beside a chart or an agent reads it with the verdict.
+import "arvo/market/v1/views.proto";
+
 // Findings, the rules that produce them, and what a run is held to.
 
 message Strategy {
@@ -81,6 +85,11 @@ message Finding {
   string detail_json = 5;
   // Files kept with the finding (#157).
   repeated Attachment attachments = 6;
+  // What is wrong with the bars the finding was produced from, as they are in
+  // the library now: a gap, a suspected unadjusted split, a stalled feed. A
+  // verdict is only as good as the series under it, so read these with it.
+  // For a panel, the faults across its members; `detail` names the member.
+  repeated arvo.market.v1.DataFindingView data_findings = 7;
 }
 
 // One file kept with a finding: bytes stored once by content hash, listed
@@ -186,6 +195,13 @@ message PanelRequest {
   string universe = 1;
   // The default rule when absent.
   optional string strategy = 2;
+  // Who is running this, as on RunRequest. With an author the panel is saved
+  // as that author's finding and deflated against everything the author has
+  // run, so a script or an agent running panels until one passes does not
+  // make it pass. Empty is a person at the window.
+  string author = 3;
+  // Where in the author's code the call was made, as "path:line". Optional.
+  string origin = 4;
 }
 
 message SharedExperiment {

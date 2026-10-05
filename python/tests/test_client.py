@@ -6,6 +6,7 @@ Skipped, loudly, when it is not.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -43,8 +44,15 @@ def engine(tmp_path: Path):
         with arvo.connect(tmp_path) as client:
             yield client
     finally:
-        process.kill()
-        process.wait()
+        # Asked to stop, so it stops the plugins it started; killed, it would
+        # leave them running after the test. Killed all the same if it will
+        # not go.
+        try:
+            subprocess.run([str(BINARY), str(tmp_path), "shutdown"], capture_output=True, timeout=45, check=False)
+            process.wait(timeout=10)
+        except (OSError, subprocess.TimeoutExpired):
+            process.kill()
+            process.wait()
 
 
 def test_reads_what_the_engine_offers(engine: arvo.Engine) -> None:
@@ -69,6 +77,38 @@ def test_a_run_says_why_it_could_not_run_and_a_missing_finding_is_not_found(
     with pytest.raises(arvo.ArvoError) as missing:
         engine.finding("nope")
     assert missing.value.code == "NOT_FOUND"
+
+
+def test_a_panel_is_somebodys_and_a_write_says_who_wrote_it(engine: arvo.Engine, tmp_path: Path) -> None:
+    """A panel is the widest search there is, so a script cannot run one as
+    nobody. A write records no finding, and says who wrote it in the trail."""
+    with pytest.raises(TypeError):
+        engine.run_panel("three")  # type: ignore[call-arg]
+
+    # Named, the call reaches the engine, which refuses it for its own reason.
+    with pytest.raises(arvo.ArvoError) as missing:
+        engine.run_panel("nowhere", author="script:test")
+    assert missing.value.code == "INVALID_ARGUMENT"
+    assert "author" not in str(missing.value)
+
+    rule = {
+        "name": "script_twin",
+        "label": "A twin, written by a script",
+        "premise": "the control, written down",
+        "interval": {"step": 1, "unit": "day"},
+        "params": {"fast": 10, "slow": 30},
+        "indicators": {"fast": {"kind": "SMA", "period": "fast"}, "slow": {"kind": "SMA", "period": "slow"}},
+        "entry": {"cross_above": [{"var": "fast"}, {"var": "slow"}]},
+        "exit": {"cross_below": [{"var": "fast"}, {"var": "slow"}]},
+    }
+    engine.write_rule(rule, author="script:test")
+    engine.write_rule({**rule, "name": "window_twin"})  # a person: no line
+
+    trail = [json.loads(line) for line in (tmp_path / "agent-audit.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [(line["agent"], line["tool"], line["ok"]) for line in trail] == [
+        ("script:test", "run_panel", False),
+        ("script:test", "write_rule", True),
+    ]
 
 
 def test_a_script_records_what_it_computed_and_arvo_judges_it(engine: arvo.Engine) -> None:
@@ -132,6 +172,9 @@ def test_a_script_records_what_it_computed_and_arvo_judges_it(engine: arvo.Engin
     )
     assert alone.verdict == "Inconclusive"
     assert any("benchmark" in reason for reason in alone.reasons)
+    # Its bars are in somebody else's library, so Arvo has nothing to say
+    # about them, and says nothing rather than "none found".
+    assert alone.data_findings == []
 
     # What cannot be left out is named, not defaulted.
     with pytest.raises(arvo.ArvoError) as missing:
