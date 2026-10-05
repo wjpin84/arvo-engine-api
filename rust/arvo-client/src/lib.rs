@@ -86,3 +86,52 @@ pub fn request<T>(
     request.metadata_mut().insert("authorization", format!("Bearer {token}").parse()?);
     Ok(request)
 }
+
+/// The metadata key a caller names itself under: `arvo-author`.
+///
+/// A run names its author in the request, because the author changes what is
+/// recorded. Every other call an agent or a script makes says who is asking
+/// here instead, so the engine's audit trail can name them without each
+/// message growing a field that is not about its subject. A caller that sends
+/// none is a person at a window.
+pub const AUTHOR: &str = "arvo-author";
+
+/// [`request`], also saying who is asking. An empty `author` sends no name.
+///
+/// # Errors
+///
+/// A token or an author that is not printable ASCII.
+pub fn request_as<T>(
+    token: &str,
+    author: &str,
+    message: T,
+) -> Result<tonic::Request<T>, tonic::metadata::errors::InvalidMetadataValue> {
+    let mut request = request(token, message)?;
+    let author = author.trim();
+    if !author.is_empty() {
+        request.metadata_mut().insert(AUTHOR, author.parse()?);
+    }
+    Ok(request)
+}
+
+/// Who `request` says is asking, when it says.
+#[must_use]
+pub fn author_of<T>(request: &tonic::Request<T>) -> Option<&str> {
+    request.metadata().get(AUTHOR)?.to_str().ok().map(str::trim).filter(|author| !author.is_empty())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_request_names_its_author_only_when_there_is_one() {
+        let named = request_as("t", " script:scan ", ()).expect("ascii");
+        assert_eq!(author_of(&named), Some("script:scan"));
+        assert!(named.metadata().get("authorization").is_some(), "and still carries the token");
+
+        let unnamed = request_as("t", "  ", ()).expect("ascii");
+        assert_eq!(author_of(&unnamed), None, "nobody is not somebody called nothing");
+        assert_eq!(author_of(&request("t", ()).expect("ascii")), None);
+    }
+}

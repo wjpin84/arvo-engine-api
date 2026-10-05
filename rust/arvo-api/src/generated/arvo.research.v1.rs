@@ -115,6 +115,14 @@ pub struct Finding {
     /// Files kept with the finding (#157).
     #[prost(message, repeated, tag = "6")]
     pub attachments: ::prost::alloc::vec::Vec<Attachment>,
+    /// What is wrong with the bars the finding was produced from, as they are in
+    /// the library now: a gap, a suspected unadjusted split, a stalled feed. A
+    /// verdict is only as good as the series under it, so read these with it.
+    /// For a panel, the faults across its members; `detail` names the member.
+    #[prost(message, repeated, tag = "7")]
+    pub data_findings: ::prost::alloc::vec::Vec<
+        super::super::market::v1::DataFindingView,
+    >,
 }
 /// One file kept with a finding: bytes stored once by content hash, listed
 /// on the record.
@@ -267,6 +275,15 @@ pub struct PanelRequest {
     /// The default rule when absent.
     #[prost(string, optional, tag = "2")]
     pub strategy: ::core::option::Option<::prost::alloc::string::String>,
+    /// Who is running this, as on RunRequest. With an author the panel is saved
+    /// as that author's finding and deflated against everything the author has
+    /// run, so a script or an agent running panels until one passes does not
+    /// make it pass. Empty is a person at the window.
+    #[prost(string, tag = "3")]
+    pub author: ::prost::alloc::string::String,
+    /// Where in the author's code the call was made, as "path:line". Optional.
+    #[prost(string, tag = "4")]
+    pub origin: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

@@ -126,6 +126,14 @@ The engine serves on loopback and admits `authorization: Bearer <token>`.
   service: the data library, accounts and their credentials, the plugins, the
   price stream, scripts, and live trading. Those are a person's decisions.
 
+A caller that is not a person says who it is. A run names its `author` in the
+request, because the author changes what is recorded: the finding is saved as
+theirs and held to everything they have run. Every other call an agent or a
+script makes carries `arvo-author: <name>` as metadata, which is what the
+engine's audit trail reads. The Rust client's `request_as` and the Python
+package's `author=` arguments send it. A call with no author is a person at a
+window.
+
 `engine.json` carries the address as well as the token, so a front end that
 can find the file can find the engine. Both files are written by the engine
 and readable only by the user it runs as. The Rust client's `discovery`

@@ -32,7 +32,9 @@ message SessionStatus {
   string instrument = 4;
   string strategy = 5;
   string started_at = 6;
-  // starting, running, frozen, halted, stopped or failed.
+  // starting, running, frozen, halted, stopped, failed or dropped. Dropped is
+  // a session the engine hosting it ended without stopping: the next engine
+  // found its record unfinished and lists it until it is started again.
   string state = 7;
   uint32 signals = 8;
   uint32 submitted = 9;

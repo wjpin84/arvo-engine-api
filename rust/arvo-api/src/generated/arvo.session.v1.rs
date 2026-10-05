@@ -43,7 +43,9 @@ pub struct SessionStatus {
     pub strategy: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub started_at: ::prost::alloc::string::String,
-    /// starting, running, frozen, halted, stopped or failed.
+    /// starting, running, frozen, halted, stopped, failed or dropped. Dropped is
+    /// a session the engine hosting it ended without stopping: the next engine
+    /// found its record unfinished and lists it until it is started again.
     #[prost(string, tag = "7")]
     pub state: ::prost::alloc::string::String,
     #[prost(uint32, tag = "8")]
