@@ -30,6 +30,11 @@ without one was the hole this closes.
 - **Python `run_panel(universe, *, author, strategy=None)`**: `author` is
   required. A script is never a person at the window. **Breaking for a script
   that calls `run_panel` today.**
+- **`SessionStatus.state` may be `dropped`** (arvo-engine#13): a session the
+  engine hosting it ended without stopping. The next engine finds its record
+  unfinished and lists it, with why in `last_error`, until it is started
+  again. A state is a string, so nothing changes on the wire; a client that
+  switches on the state should treat it as it treats `failed`.
 
 ## 0.6.0 (2026-09-27)
 
