@@ -87,8 +87,9 @@ message PromotionView {
   // The finding's own verdict: Supported, NotSupported or Inconclusive.
   // Empty when the finding cannot be opened.
   string verdict = 3;
-  // Days the finding has run on paper, by its paper record; absent when it
-  // has not.
+  // Days on which the finding's paper session took a bar, by its record;
+  // absent when it has none. Not calendar days: a session stopped for a
+  // fortnight did not run for one.
   optional int64 paper_days = 4;
   // The paper session's last verdict against the finding (holding,
   // diverging, inconclusive), when it has one.

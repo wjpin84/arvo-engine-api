@@ -124,8 +124,9 @@ pub struct PromotionView {
     /// Empty when the finding cannot be opened.
     #[prost(string, tag = "3")]
     pub verdict: ::prost::alloc::string::String,
-    /// Days the finding has run on paper, by its paper record; absent when it
-    /// has not.
+    /// Days on which the finding's paper session took a bar, by its record;
+    /// absent when it has none. Not calendar days: a session stopped for a
+    /// fortnight did not run for one.
     #[prost(int64, optional, tag = "4")]
     pub paper_days: ::core::option::Option<i64>,
     /// The paper session's last verdict against the finding (holding,
