@@ -2811,6 +2811,36 @@ pub mod research_client {
                 .insert(GrpcMethod::new("arvo.services.v1.Research", "RunWalkForward"));
             self.inner.unary(req, path, codec).await
         }
+        /// Re-run a study's chosen configuration, unchanged, on the bars recorded
+        /// after everything that study saw (ADR-0040). One configuration and no
+        /// search, so it is judged alone rather than against its author's other
+        /// tries, and it is recorded as a study that names the finding it confirms.
+        /// Refused for anything but a study, for a confirmation, and while the
+        /// library holds no bar after the study's window.
+        pub async fn confirm_finding(
+            &mut self,
+            request: impl tonic::IntoRequest<::arvo_api::research::ConfirmRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::Finding>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/arvo.services.v1.Research/ConfirmFinding",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("arvo.services.v1.Research", "ConfirmFinding"));
+            self.inner.unary(req, path, codec).await
+        }
         /// Record evidence computed elsewhere. Arvo judges it with a study's
         /// criteria, saves it as the author's finding held to the author's whole
         /// search, and answers with the finding it made of it (ADR-0026).
@@ -3577,6 +3607,19 @@ pub mod research_server {
             tonic::Response<::arvo_api::research::Finding>,
             tonic::Status,
         >;
+        /// Re-run a study's chosen configuration, unchanged, on the bars recorded
+        /// after everything that study saw (ADR-0040). One configuration and no
+        /// search, so it is judged alone rather than against its author's other
+        /// tries, and it is recorded as a study that names the finding it confirms.
+        /// Refused for anything but a study, for a confirmation, and while the
+        /// library holds no bar after the study's window.
+        async fn confirm_finding(
+            &self,
+            request: tonic::Request<::arvo_api::research::ConfirmRequest>,
+        ) -> std::result::Result<
+            tonic::Response<::arvo_api::research::Finding>,
+            tonic::Status,
+        >;
         /// Record evidence computed elsewhere. Arvo judges it with a study's
         /// criteria, saves it as the author's finding held to the author's whole
         /// search, and answers with the finding it made of it (ADR-0026).
@@ -4147,6 +4190,51 @@ pub mod research_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = RunWalkForwardSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/arvo.services.v1.Research/ConfirmFinding" => {
+                    #[allow(non_camel_case_types)]
+                    struct ConfirmFindingSvc<T: Research>(pub Arc<T>);
+                    impl<
+                        T: Research,
+                    > tonic::server::UnaryService<::arvo_api::research::ConfirmRequest>
+                    for ConfirmFindingSvc<T> {
+                        type Response = ::arvo_api::research::Finding;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<::arvo_api::research::ConfirmRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Research>::confirm_finding(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ConfirmFindingSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

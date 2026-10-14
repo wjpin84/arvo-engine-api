@@ -59,6 +59,11 @@ pub struct FindingSummary {
     /// the rule the file now holds.
     #[prost(string, tag = "9")]
     pub ruleset_hash: ::prost::alloc::string::String,
+    /// The finding this one confirms (ADR-0040), when it is a confirmation:
+    /// the same configuration re-run on bars that finding never saw. Empty
+    /// for every other finding.
+    #[prost(string, tag = "10")]
+    pub confirms: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -170,6 +175,18 @@ pub struct AttachmentRef {
     pub finding_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub hash: ::prost::alloc::string::String,
+}
+/// A confirmation of one study (ADR-0040). `author` and `origin` mean what
+/// they mean on `RunRequest`; empty `author` is a person at the window.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ConfirmRequest {
+    #[prost(string, tag = "1")]
+    pub finding_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub author: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub origin: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

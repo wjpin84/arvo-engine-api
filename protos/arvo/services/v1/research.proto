@@ -19,6 +19,13 @@ service Research {
   // Re-select on a rolling schedule across the whole history. Slower by
   // roughly the number of folds.
   rpc RunWalkForward(arvo.research.v1.RunRequest) returns (arvo.research.v1.Finding);
+  // Re-run a study's chosen configuration, unchanged, on the bars recorded
+  // after everything that study saw (ADR-0040). One configuration and no
+  // search, so it is judged alone rather than against its author's other
+  // tries, and it is recorded as a study that names the finding it confirms.
+  // Refused for anything but a study, for a confirmation, and while the
+  // library holds no bar after the study's window.
+  rpc ConfirmFinding(arvo.research.v1.ConfirmRequest) returns (arvo.research.v1.Finding);
   // Record evidence computed elsewhere. Arvo judges it with a study's
   // criteria, saves it as the author's finding held to the author's whole
   // search, and answers with the finding it made of it (ADR-0026).

@@ -68,6 +68,11 @@ class ResearchStub(object):
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.RunRequest.SerializeToString,
                 response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.Finding.FromString,
                 _registered_method=True)
+        self.ConfirmFinding = channel.unary_unary(
+                '/arvo.services.v1.Research/ConfirmFinding',
+                request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.ConfirmRequest.SerializeToString,
+                response_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.Finding.FromString,
+                _registered_method=True)
         self.RecordFinding = channel.unary_unary(
                 '/arvo.services.v1.Research/RecordFinding',
                 request_serializer=arvo_dot_research_dot_v1_dot_models__pb2.ReportRequest.SerializeToString,
@@ -248,6 +253,18 @@ class ResearchServicer(object):
     def RunWalkForward(self, request, context):
         """Re-select on a rolling schedule across the whole history. Slower by
         roughly the number of folds.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ConfirmFinding(self, request, context):
+        """Re-run a study's chosen configuration, unchanged, on the bars recorded
+        after everything that study saw (ADR-0040). One configuration and no
+        search, so it is judged alone rather than against its author's other
+        tries, and it is recorded as a study that names the finding it confirms.
+        Refused for anything but a study, for a confirmation, and while the
+        library holds no bar after the study's window.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -485,6 +502,11 @@ def add_ResearchServicer_to_server(servicer, server):
             'RunWalkForward': grpc.unary_unary_rpc_method_handler(
                     servicer.RunWalkForward,
                     request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.RunRequest.FromString,
+                    response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.Finding.SerializeToString,
+            ),
+            'ConfirmFinding': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConfirmFinding,
+                    request_deserializer=arvo_dot_research_dot_v1_dot_models__pb2.ConfirmRequest.FromString,
                     response_serializer=arvo_dot_research_dot_v1_dot_models__pb2.Finding.SerializeToString,
             ),
             'RecordFinding': grpc.unary_unary_rpc_method_handler(
@@ -789,6 +811,33 @@ class Research(object):
             target,
             '/arvo.services.v1.Research/RunWalkForward',
             arvo_dot_research_dot_v1_dot_models__pb2.RunRequest.SerializeToString,
+            arvo_dot_research_dot_v1_dot_models__pb2.Finding.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ConfirmFinding(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/arvo.services.v1.Research/ConfirmFinding',
+            arvo_dot_research_dot_v1_dot_models__pb2.ConfirmRequest.SerializeToString,
             arvo_dot_research_dot_v1_dot_models__pb2.Finding.FromString,
             options,
             channel_credentials,
