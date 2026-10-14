@@ -5,11 +5,16 @@ bump named on each release follows [VERSIONING.md](VERSIONING.md).
 
 ## Unreleased
 
-A minor bump when it is released. On the wire it is additive: three fields and
-one metadata key, and an older engine ignores all of them. **One binding
+A minor bump when it is released. On the wire it is additive: five fields, one
+call and one metadata key, and an older engine ignores all of them. **One binding
 breaks:** the Python `run_panel` now requires `author`, because a panel run
 without one was the hole this closes.
 
+- **`Research.ConfirmFinding(ConfirmRequest)`** (ADR-0040): re-runs a
+  study's chosen configuration, unchanged, on the bars recorded after
+  everything the study saw, as one try judged alone and linked to the study.
+  `FindingSummary.confirms` names the finding a confirmation confirms. An
+  older engine answers `Unimplemented`. Additive.
 - **`PanelRequest.author`** and **`PanelRequest.origin`** (#8): who is running
   a panel, with the meaning they have on `RunRequest`. With an author the
   panel is saved as that author's finding and deflated against everything the

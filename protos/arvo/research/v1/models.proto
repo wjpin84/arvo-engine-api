@@ -48,6 +48,10 @@ message FindingSummary {
   // hash no longer matches the file is stale: the rule it measured is not
   // the rule the file now holds.
   string ruleset_hash = 9;
+  // The finding this one confirms (ADR-0040), when it is a confirmation:
+  // the same configuration re-run on bars that finding never saw. Empty
+  // for every other finding.
+  string confirms = 10;
 }
 
 message Findings {
@@ -121,6 +125,14 @@ message Attachments {
 message AttachmentRef {
   string finding_id = 1;
   string hash = 2;
+}
+
+// A confirmation of one study (ADR-0040). `author` and `origin` mean what
+// they mean on `RunRequest`; empty `author` is a person at the window.
+message ConfirmRequest {
+  string finding_id = 1;
+  string author = 2;
+  string origin = 3;
 }
 
 message RunRequest {
